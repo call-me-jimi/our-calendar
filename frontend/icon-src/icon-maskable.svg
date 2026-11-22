@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Maskable + apple-touch: full-bleed and opaque; the glyph is scaled to 80% so it stays inside the safe-zone circle (radius 40%). -->
+  <rect width="512" height="512" fill="#2f6fde"/>
+  <g transform="translate(256 256) scale(0.8) translate(-256 -250)">
+    <rect x="96" y="120" width="320" height="296" rx="40" fill="#ffffff"/>
+    <path d="M96 160a40 40 0 0 1 40-40h240a40 40 0 0 1 40 40v40H96z" fill="#1d4fae"/>
+    <rect x="164" y="84" width="40" height="76" rx="20" fill="#ffffff"/>
+    <rect x="308" y="84" width="40" height="76" rx="20" fill="#ffffff"/>
+    <path d="M178 306l52 52 104-104" fill="none" stroke="#2e9e57" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

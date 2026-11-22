@@ -1,0 +1,44 @@
+[project]
+name = "wannpassts"
+version = "0.1.0"
+description = "Wann passt's? - find days that suit the whole group"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi>=0.163.2",
+    "httpx>=0.28.1",
+    "icalendar>=7.3.0",
+    "tzdata>=2026.6",
+    "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.2",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.5",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+ignore = ["S101"]  # assert is fine in tests
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S106"]  # test passwords
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["no_mail: run without SMTP configured (link mode, spec §3.1)"]

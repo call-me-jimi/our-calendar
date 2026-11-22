@@ -1,0 +1,27 @@
+# Laptop: https://wann.localhost:8444 with Caddy's local CA (`make trust`).
+# Ports are on loopback and chosen not to collide with the common 8443 and 8025.
+
+services:
+  app:
+    environment:
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_STARTTLS: "false"
+      MAIL_FROM: "Wann passt's? <noreply@wann.localhost>"
+      # Every e2e sign-in comes from the same Docker address; production keeps 20.
+      LINK_LIMIT_PER_IP: "1000"
+
+  caddy:
+    ports:
+      - "127.0.0.1:8444:443"
+    volumes:
+      - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - ./caddy/headers.caddy:/etc/caddy/headers.caddy:ro
+
+  # Outgoing email (magic links, P1). Web UI: http://127.0.0.1:8026
+  mailpit:
+    image: axllent/mailpit:v1.33
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8026:8025"
+    networks: [internal, edge]

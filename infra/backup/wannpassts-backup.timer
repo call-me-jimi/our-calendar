@@ -1,0 +1,13 @@
+# Nightly at 03:30 Berlin time (the server's clock is UTC), before the app's holiday sync
+# (04:00) and the unattended-upgrades reboot window (04:30 UTC). Persistent: a run missed
+# while the box was off happens at the next boot.
+[Unit]
+Description=Nightly Wann passt's? backup, 03:30 Europe/Berlin
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Europe/Berlin
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

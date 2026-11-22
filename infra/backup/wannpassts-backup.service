@@ -1,0 +1,17 @@
+# The nightly backup (docs/runbooks/backup.md). `make deploy` installs this unit, and
+# `make backup-init` enables its timer. By hand (server):
+#   sudo systemctl start wannpassts-backup; sudo journalctl -u wannpassts-backup -n 50
+[Unit]
+Description=Wann passt's? backup: SQLite copy to the Storage Box (restic)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# root: it reads /srv/wannpassts/secrets; the SQLite copy itself runs as the app's uid.
+ExecStart=/srv/wannpassts/current/infra/backup/backup.sh
+# Units get no HOME: restic needs it for its cache, sqlite3 for ~/.sqliterc.
+Environment=HOME=/root
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=1h

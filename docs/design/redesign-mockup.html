@@ -1,0 +1,963 @@
+<title>Wann passt's? Redesign</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: app header, group header with tabs, one calendar card; a floating action sheet appears when days are selected. */
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --cell: #f1eee9;
+  --line: #e4dfd7;
+  --ink: #2a2530;
+  --muted: #6b6472;
+  --accent: #4b4fd8;
+  --accent-soft: #e8e8fb;
+  --on-accent: #ffffff;
+  --busy: #e0464b;
+  --on-busy: #ffffff;
+  --busy-soft: #fde3e3;
+  --maybe: #eaa92a;
+  --maybe-soft: #fcefd3;
+  --maybe-ink: #5a3d00;
+  --free: #2e9b5f;
+  --free-soft: #d4efdf;
+  --free-softer: #ebf6ef;
+  --event: #0e86a8;
+  --school: #9b6bd3;
+  --holiday: #c94a12;
+  --shadow: 0 1px 2px rgb(42 37 48 / 0.06), 0 8px 24px rgb(42 37 48 / 0.08);
+  --font-display: "Bricolage Grotesque", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r-cell: 12px;
+  --r-card: 20px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17151b; --surface: #211f26; --cell: #2b2831; --line: #3a3641; --ink: #eeeaf2; --muted: #a8a0b0;
+    --accent: #9396f7; --accent-soft: #2f3058; --on-accent: #16151b;
+    --busy: #f0575c; --on-busy: #1a0f10; --busy-soft: #4a2528;
+    --maybe: #f0b545; --maybe-soft: #463819; --maybe-ink: #f7dca6;
+    --free: #55c78a; --free-soft: #224a34; --free-softer: #1c3528;
+    --event: #45b9db; --school: #b791ea; --holiday: #ff8f57;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17151b; --surface: #211f26; --cell: #2b2831; --line: #3a3641; --ink: #eeeaf2; --muted: #a8a0b0;
+  --accent: #9396f7; --accent-soft: #2f3058; --on-accent: #16151b;
+  --busy: #f0575c; --on-busy: #1a0f10; --busy-soft: #4a2528;
+  --maybe: #f0b545; --maybe-soft: #463819; --maybe-ink: #f7dca6;
+  --free: #55c78a; --free-soft: #224a34; --free-softer: #1c3528;
+  --event: #45b9db; --school: #b791ea; --holiday: #ff8f57;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* App header */
+.app-header { background: var(--surface); border-bottom: 1px solid var(--line); }
+.app-header .wrap { display: flex; align-items: center; gap: 16px; padding-block: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; }
+.logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 6px; }
+.logo i { background: var(--on-accent); border-radius: 2px; opacity: 0.55; }
+.logo i.on { opacity: 1; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.lang { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.lang button { border: 0; background: none; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.quiet { border: 0; background: none; padding: 6px 10px; border-radius: 10px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.quiet:hover { background: var(--cell); color: var(--ink); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--maybe-soft); color: var(--maybe-ink); font-weight: 800; display: grid; place-items: center; border: 0; cursor: pointer; }
+
+/* Group header */
+.group-head { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding-block: 24px 16px; }
+.group-name { font-family: var(--font-display); font-weight: 800; font-size: 28px; letter-spacing: -0.02em; margin: 0; }
+.group-meta { color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.faces { display: flex; }
+.faces span { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--bg); margin-left: -6px; display: grid; place-items: center; font-size: 11px; font-weight: 800; }
+.faces span:first-child { margin-left: 0; }
+.tabs { display: flex; gap: 4px; margin-left: auto; background: var(--cell); padding: 4px; border-radius: 14px; }
+.tabs a { padding: 7px 14px; border-radius: 10px; text-decoration: none; color: var(--muted); font-weight: 700; font-size: 14px; }
+.tabs a[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / 0.08); }
+
+/* Intro card */
+.intro { background: var(--accent-soft); border-radius: var(--r-card); padding: 20px 24px; margin-bottom: 16px; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; }
+.intro h2 { font-family: var(--font-display); font-size: 19px; margin: 0 0 12px; letter-spacing: -0.01em; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.steps li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; min-width: 0; }
+.steps b { display: block; font-weight: 800; }
+.steps span.n { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+.steps p { margin: 0; color: var(--muted); font-size: 14px; }
+.btn { border: 0; border-radius: 12px; padding: 9px 16px; font-weight: 800; cursor: pointer; background: var(--accent); color: var(--on-accent); white-space: nowrap; }
+.btn.ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1px var(--muted); }
+
+/* Calendar card */
+.card { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--shadow); padding: 20px 24px 16px; margin-bottom: 120px; }
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.seg { display: flex; background: var(--cell); padding: 4px; border-radius: 14px; }
+.seg button { border: 0; background: none; padding: 7px 14px; border-radius: 10px; font-weight: 700; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / 0.1); }
+.seg .dot { width: 10px; height: 10px; border-radius: 3px; }
+.toolbar .spacer { flex: 1; }
+.nav { display: flex; align-items: center; gap: 4px; }
+.icon-btn { width: 36px; height: 36px; border-radius: 11px; border: 0; background: var(--cell); cursor: pointer; font-size: 18px; font-weight: 700; display: grid; place-items: center; }
+.icon-btn:hover:not(:disabled) { background: var(--line); }
+.icon-btn:disabled { opacity: 0.35; cursor: default; }
+.today-btn { border: 0; background: var(--cell); border-radius: 11px; height: 36px; padding: 0 14px; font-weight: 700; cursor: pointer; }
+.today-btn:hover { background: var(--line); }
+.help { font-family: var(--font-display); font-weight: 800; }
+
+.hint { display: flex; align-items: center; gap: 10px; margin: 16px 0 4px; padding: 10px 14px; border-radius: 12px; background: var(--cell); font-weight: 600; font-size: 14px; }
+.hint .ico { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-size: 12px; font-weight: 800; }
+.hint.active { background: var(--accent-soft); }
+
+.months { display: grid; gap: 32px; margin-top: 16px; }
+.month h3 { font-family: var(--font-display); font-weight: 700; font-size: 17px; margin: 0 0 8px; letter-spacing: -0.01em; }
+.month h3 small { color: var(--muted); font-weight: 600; font-family: var(--font-body); font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px 5px; user-select: none; -webkit-user-select: none; }
+.wd { text-align: center; font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; padding-bottom: 2px; }
+.wd.we { color: color-mix(in srgb, var(--muted) 70%, transparent); }
+
+.cell {
+  position: relative; height: 48px; border: 0; border-radius: var(--r-cell); background: var(--cell);
+  font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; cursor: pointer; padding: 0;
+  transition: transform 0.08s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+  touch-action: manipulation;
+}
+.cell:hover:not(.past) { transform: translateY(-1px); box-shadow: 0 2px 6px rgb(0 0 0 / 0.08); }
+.cell.past { opacity: 0.4; cursor: default; }
+.cell .num { position: relative; z-index: 1; }
+.cell.today .num { display: inline-grid; place-items: center; min-width: 26px; height: 26px; border-radius: 999px; background: var(--ink); color: var(--surface); padding: 0 6px; }
+
+.view-mine .cell.busy { background: var(--busy); color: var(--on-busy); }
+.view-mine .cell.maybe { background: repeating-linear-gradient(-45deg, var(--maybe-soft) 0 6px, color-mix(in srgb, var(--maybe) 55%, var(--maybe-soft)) 6px 9px); color: var(--maybe-ink); box-shadow: inset 0 0 0 2px var(--maybe); }
+
+.view-group .cell.g-free { background: var(--free-soft); }
+.view-group .cell.g-maybe { background: repeating-linear-gradient(-45deg, var(--free-softer) 0 6px, var(--free-soft) 6px 9px); }
+.view-group .cell.g-missing { background: var(--cell); color: var(--muted); }
+.view-group .cell.g-event { background: var(--cell); }
+.view-group .cell.dim { opacity: 0.3; }
+.view-group .cell.has-bar .num { top: -3px; }
+/* Gruppe: one small box per member, same order every day: empty = can, amber = maybe, red = can't. */
+.bar { position: absolute; bottom: 6px; left: 6px; right: 6px; display: flex; justify-content: center; gap: 2px; z-index: 1; }
+.bar i, .sw-bar i { flex: 0 1 7px; min-width: 2px; height: 7px; border-radius: 2px; }
+.bar .f, .sw-bar .f { box-shadow: inset 0 0 0 1.25px color-mix(in srgb, var(--ink) 45%, transparent); }
+.bar .m, .sw-bar .m { background: var(--maybe); }
+.bar .b, .sw-bar .b { background: var(--busy); }
+.sw-bar { display: inline-flex; gap: 2px; width: 34px; }
+
+.cell.selected { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); transform: translateY(-1px); }
+
+.ev { position: absolute; top: 0; left: 0; right: 0; height: 5px; border-radius: var(--r-cell) var(--r-cell) 0 0; background: var(--event); }
+/* Schulferien: one ribbon under the days, bridging the gaps, rounded where a stretch starts or ends. */
+.school { position: absolute; bottom: -7px; left: -3px; right: -3px; height: 4px; background: var(--school); opacity: 0.85; }
+.school.s { left: 4px; border-top-left-radius: 2px; border-bottom-left-radius: 2px; }
+.school.e { right: 4px; border-top-right-radius: 2px; border-bottom-right-radius: 2px; }
+.cell.past .school { opacity: 1; }
+.hol { position: absolute; top: 6px; left: 6px; font-size: 10px; line-height: 1; color: var(--holiday); z-index: 1; }
+.cell.bank .num { color: var(--holiday); }
+.view-mine .cell.bank.busy .num, .cell.bank.today .num { color: inherit; }
+.view-mine .cell.busy .hol { color: var(--on-busy); }
+.cell.bank.today .num { color: var(--surface); }
+.note { position: absolute; bottom: 4px; right: 5px; width: 12px; height: 12px; opacity: 0.85; z-index: 1; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 20px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); list-style: none; font-size: 13px; color: var(--muted); font-weight: 600; }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.sw { width: 18px; height: 14px; border-radius: 4px; display: inline-block; position: relative; flex: none; }
+
+/* Action sheet */
+.sheet {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(640px, calc(100% - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  background: var(--surface); border-radius: 20px; box-shadow: 0 0 0 1px var(--line), 0 18px 48px rgb(0 0 0 / 0.22);
+  padding: 16px 18px; z-index: 20; display: grid; gap: 12px;
+  animation: up 0.18s ease-out;
+}
+@keyframes up { from { transform: translate(-50%, 12px); opacity: 0; } }
+.sheet-top { display: flex; gap: 12px; align-items: start; }
+.sheet-title { font-family: var(--font-display); font-weight: 800; font-size: 18px; letter-spacing: -0.01em; margin: 0; }
+.sheet-sub { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.sheet-sub b { color: var(--ink); }
+.close { margin-left: auto; flex: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.chip { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--cell); }
+.question { font-weight: 800; font-size: 14px; margin: 0; }
+.choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice { flex: 1 1 140px; border: 0; border-radius: 14px; padding: 12px 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 10px; text-align: left; box-shadow: inset 0 0 0 1.5px var(--line); background: var(--surface); }
+.choice:hover { box-shadow: inset 0 0 0 2px var(--ink); }
+.choice small { display: block; font-weight: 600; color: var(--muted); font-size: 12px; }
+.choice .sw { width: 22px; height: 22px; border-radius: 7px; }
+.note-row { display: flex; gap: 8px; align-items: center; }
+.note-row input { flex: 1; min-width: 0; border: 0; box-shadow: inset 0 0 0 1.5px var(--line); border-radius: 12px; padding: 9px 12px; font: inherit; font-size: 14px; background: var(--bg); color: var(--ink); }
+.note-row input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+
+.sw-busy { background: var(--busy); }
+.sw-maybe { background: repeating-linear-gradient(-45deg, var(--maybe-soft) 0 3px, var(--maybe) 3px 5px); box-shadow: inset 0 0 0 1.5px var(--maybe); }
+.sw-free { background: var(--cell); box-shadow: inset 0 0 0 1.5px var(--line); }
+.sw-gfree { background: var(--free-soft); }
+.sw-gmaybe { background: repeating-linear-gradient(-45deg, var(--free-softer) 0 3px, var(--free-soft) 3px 5px); box-shadow: inset 0 0 0 1px var(--free-soft); }
+.sw-gmissing { background: var(--cell); }
+.sw-ev { background: var(--cell); overflow: hidden; }
+.sw-ev::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--event); }
+.sw-school { background: none; width: 26px; }
+.sw-school::before { content: ""; position: absolute; top: 5px; left: 0; right: 0; height: 4px; border-radius: 2px; background: var(--school); }
+.sw-hol { background: none; width: auto; height: auto; color: var(--holiday); font-size: 12px; }
+.sw-note { background: none; width: 14px; height: 14px; color: var(--ink); }
+
+/* Gruppe: "Passende Tage finden" panel — filters as questions, result underneath */
+.finder { margin-top: 16px; border: 1.5px solid var(--line); border-radius: 16px; overflow: hidden; }
+.finder-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.finder-head svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+.finder-head b { font-family: var(--font-display); font-size: 16px; }
+.finder-head .reset { margin-left: auto; border: 0; background: none; color: var(--accent); font-weight: 800; font-size: 13px; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
+.finder-head .reset:hover { background: var(--accent-soft); }
+.frow { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 8px 16px; align-items: center; padding: 10px 16px; }
+.frow + .frow { border-top: 1px dashed var(--line); }
+.flabel { font-weight: 800; font-size: 14px; }
+.flabel small { display: block; font-weight: 600; color: var(--muted); font-size: 12px; }
+.fopts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.cchip { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--line); background: var(--surface); border-radius: 10px; padding: 4px 10px 4px 7px; font-weight: 700; font-size: 14px; cursor: pointer; color: var(--muted); }
+.cchip .box { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--muted); display: grid; place-items: center; font-size: 11px; font-weight: 900; color: transparent; flex: none; }
+.cchip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.cchip[aria-pressed="true"] .box { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.presets { display: inline-flex; gap: 2px; margin-left: 8px; padding-left: 10px; border-left: 1px solid var(--line); }
+.presets button { border: 0; background: none; color: var(--accent); font-weight: 800; font-size: 13px; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
+.presets button:hover { background: var(--accent-soft); }
+.result { background: var(--free-softer); padding: 12px 16px; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 8px 16px; align-items: center; }
+.result .count { font-weight: 600; font-size: 13px; color: var(--muted); }
+.switch { display: flex; align-items: center; gap: 8px; border: 0; background: none; font-weight: 700; font-size: 14px; cursor: pointer; padding: 4px 0; }
+.switch .track { width: 34px; height: 20px; border-radius: 999px; background: var(--line); position: relative; flex: none; transition: background-color 0.15s; }
+.switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgb(0 0 0 / 0.2); transition: left 0.15s; }
+.switch[aria-pressed="true"] .track { background: var(--accent); }
+.switch[aria-pressed="true"] .track::after { left: 16px; }
+.bchip { border: 0; border-radius: 10px; padding: 5px 11px; background: var(--surface); font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--free-soft); }
+.bchip:hover { box-shadow: inset 0 0 0 2px var(--free); }
+.dates { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; color: var(--muted); }
+.dates input { font: inherit; font-size: 14px; color: var(--ink); background: var(--bg); border: 0; box-shadow: inset 0 0 0 1.5px var(--line); border-radius: 10px; padding: 5px 8px; }
+.fopts .seg button { padding: 5px 11px; font-size: 14px; }
+
+/* Gruppe, "Tabelle": members x days for one month */
+.ov-month { font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; margin: 16px 0 0; }
+.ov-scroll { overflow-x: auto; margin-top: 4px; padding-bottom: 6px; }
+.ov th.dim, .ov td.dim { opacity: 0.3; }
+.ov { border-collapse: separate; border-spacing: 3px; font-variant-numeric: tabular-nums; }
+.ov th.name { position: sticky; left: 0; z-index: 3; background: var(--surface); text-align: left; padding: 0 12px 0 0; min-width: 150px; font-weight: 800; font-size: 14px; white-space: nowrap; }
+.ov th.name > div { display: flex; align-items: center; gap: 8px; }
+.ov th.name small { display: block; font-weight: 600; color: var(--muted); font-size: 12px; }
+.ov th.name .av { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; flex: none; }
+.ovh { position: relative; min-width: 30px; height: 50px; font-size: 12px; font-weight: 800; vertical-align: bottom; padding: 0 0 9px; text-align: center; }
+.ovh .wdl { display: block; font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
+.ovh.we .wdl, .ovh.we .dn { color: var(--accent); }
+.ovh.today .dn { background: var(--ink); color: var(--surface); border-radius: 999px; padding: 1px 6px; }
+.ovh .hol { top: 2px; left: 50%; transform: translateX(-50%); }
+.ovh .ev { border-radius: 3px; height: 4px; }
+.ovh .school { bottom: 1px; }
+.ovh.bank .dn { color: var(--holiday); }
+.ov td { height: 30px; min-width: 30px; border-radius: 7px; background: var(--cell); position: relative; padding: 0; }
+.ov td.busy { background: var(--busy); color: var(--on-busy); }
+.ov td.maybe { background: repeating-linear-gradient(-45deg, var(--maybe-soft) 0 4px, color-mix(in srgb, var(--maybe) 55%, var(--maybe-soft)) 4px 6px); color: var(--maybe-ink); box-shadow: inset 0 0 0 1.5px var(--maybe); }
+.ov td.past { opacity: 0.45; }
+.ov td .note { bottom: 3px; right: 3px; width: 10px; height: 10px; }
+.ov tr.sum td { height: 34px; cursor: pointer; font-size: 12px; font-weight: 800; text-align: center; }
+.ov tr.sum td.g-free { background: var(--free-soft); }
+.ov tr.sum td.g-maybe { background: repeating-linear-gradient(-45deg, var(--free-softer) 0 4px, var(--free-soft) 4px 6px); }
+.ov tr.sum td.g-missing { color: var(--busy); }
+.ov tr.sum td.selected { box-shadow: 0 0 0 2px var(--accent); }
+.ov tr.sum th, .ov tr.sum td { border-bottom: 0; }
+.ov tr.gap td, .ov tr.gap th { height: 6px; background: none; }
+@media (max-width: 720px) { .ov th.name { min-width: 104px; } .ov th.name small { display: none; } }
+
+.stepper { display: inline-flex; align-items: center; gap: 4px; }
+.stepper .icon-btn { width: 32px; height: 32px; border-radius: 10px; }
+.stepper output { min-width: 64px; text-align: center; font-weight: 800; }
+.result { align-items: start; }
+.matches { display: grid; gap: 6px; max-height: 232px; overflow: auto; padding-right: 4px; }
+.mgroup { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.mname { width: 64px; flex: none; font-weight: 800; font-size: 13px; color: var(--muted); }
+.mgroup .bchip { padding: 3px 8px; font-size: 12.5px; }
+.result .none { color: var(--muted); font-weight: 600; font-size: 14px; }
+@media (max-width: 720px) {
+  .frow, .result { grid-template-columns: 1fr; }
+  .presets { margin-left: 0; padding-left: 0; border-left: 0; }
+}
+
+/* Gruppe: day summary, a popover next to the day (a bottom sheet on phones) */
+.pop { position: absolute; z-index: 25; width: min(360px, calc(100vw - 32px)); background: var(--surface); border-radius: 18px; box-shadow: 0 0 0 1px var(--line), 0 18px 48px rgb(0 0 0 / 0.22); padding: 16px; display: grid; gap: 12px; animation: fade 0.14s ease-out; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } }
+.pop-head { display: flex; align-items: start; gap: 10px; }
+.pop-head .close { width: 30px; height: 30px; font-size: 14px; }
+.status { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; font-weight: 800; font-size: 13px; }
+.status.good { background: var(--free-soft); }
+.status.meh { background: var(--maybe-soft); color: var(--maybe-ink); }
+.status.bad { background: var(--busy-soft); }
+.mlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mrow { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.mrow .av { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+.mrow .nm { font-weight: 700; }
+.mrow .nt { display: block; font-size: 13px; color: var(--muted); font-weight: 600; overflow-wrap: anywhere; }
+.mrow .st { font-size: 13px; font-weight: 800; text-align: right; }
+.st-b { color: var(--busy); } .st-m { color: var(--maybe-ink); } .st-f { color: var(--free); }
+.extras { display: flex; flex-wrap: wrap; gap: 6px; }
+.extras span { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--cell); display: inline-flex; align-items: center; gap: 6px; }
+.extras .x-ev::before, .extras .x-sc::before { content: ""; width: 10px; height: 4px; border-radius: 2px; background: var(--event); }
+.extras .x-sc::before { background: var(--school); }
+.extras .x-hol { color: var(--holiday); }
+.pop-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pop-actions .btn { flex: 1; }
+@media (max-width: 720px) {
+  .pop { position: fixed; left: 12px !important; right: 12px; top: auto !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: auto; max-height: 70vh; overflow: auto; }
+}
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--surface); padding: 12px 14px 12px 18px; border-radius: 14px; display: flex; gap: 14px; align-items: center; font-weight: 700; z-index: 30; box-shadow: var(--shadow); max-width: calc(100% - 24px); animation: up 0.18s ease-out; }
+.toast button { border: 0; background: color-mix(in srgb, var(--surface) 16%, transparent); color: var(--surface); padding: 6px 12px; border-radius: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+
+.helpbox { margin-top: 16px; font-size: 14px; color: var(--muted); }
+.helpbox kbd { font-family: inherit; font-size: 12px; font-weight: 800; padding: 1px 6px; border-radius: 6px; background: var(--cell); color: var(--ink); box-shadow: inset 0 -1px 0 var(--line); }
+
+.mock-note { font-size: 13px; color: var(--muted); text-align: center; margin: -96px 0 120px; }
+
+@media (max-width: 720px) {
+  .group-head { gap: 12px; padding-block: 16px 12px; }
+  .group-name { font-size: 24px; }
+  .tabs { margin-left: 0; width: 100%; }
+  .tabs a { flex: 1; text-align: center; }
+  .intro { grid-template-columns: 1fr; padding: 18px; }
+  .steps { grid-template-columns: 1fr; gap: 12px; }
+  .card { padding: 16px 12px 12px; border-radius: 16px; }
+  .toolbar .spacer { display: none; }
+  .toolbar { justify-content: space-between; }
+  .add-event-label { display: none; }
+  .header-right .quiet.admin { display: none; }
+  .cell { height: 46px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+
+<header class="app-header">
+  <div class="wrap">
+    <div class="brand"><span class="logo" aria-hidden="true"><i></i><i class="on"></i><i></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i><i></i></span>Wann passt's?</div>
+    <div class="header-right">
+      <div class="lang" role="group" aria-label="Sprache"><button aria-pressed="true">DE</button><button aria-pressed="false">EN</button></div>
+      <button class="quiet admin">Admin</button>
+      <button class="avatar" title="Konto">H</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="group-head">
+    <div>
+      <h1 class="group-name">Die Proberaum-Band</h1>
+      <div class="group-meta"><span class="faces" id="faces"></span><span>4 Mitglieder</span></div>
+    </div>
+    <nav class="tabs" aria-label="Gruppe">
+      <a href="#" data-tab="mine" aria-current="page">Meine Tage</a>
+      <a href="#" data-tab="group">Gruppe</a>
+      <a href="#" data-tab="set">Einstellungen</a>
+    </nav>
+  </div>
+
+  <section class="intro" id="intro" aria-labelledby="intro-title">
+    <div>
+      <h2 id="intro-title">So funktioniert's</h2>
+      <ol class="steps">
+        <li><span class="n">1</span><div><b>Tage antippen</b><p>Wähle die Tage, an denen du nicht kannst. Am Computer kannst du auch über mehrere Tage ziehen.</p></div></li>
+        <li><span class="n">2</span><div><b>Sagen, was gilt</b><p>Unten fragt die App: belegt oder vielleicht? Optional mit Notiz, zum Beispiel „Urlaub“.</p></div></li>
+        <li><span class="n">3</span><div><b>Passende Tage finden</b><p>Unter „Gruppe“ siehst du, wann alle können. Grün heißt: alle frei.</p></div></li>
+      </ol>
+    </div>
+    <button class="btn" id="intro-ok">Verstanden</button>
+  </section>
+
+  <section class="card" id="card">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Darstellung" id="layout-seg">
+        <button id="l-cal" aria-pressed="true">Kalender</button>
+        <button id="l-table" aria-pressed="false">Tabelle</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="today-btn" id="add-event">+ <span class="add-event-label">Termin</span></button>
+      <div class="nav">
+        <button class="icon-btn" id="prev" aria-label="Vorheriger Monat">‹</button>
+        <button class="today-btn" id="today">Heute</button>
+        <button class="icon-btn" id="next" aria-label="Nächster Monat">›</button>
+      </div>
+      <button class="icon-btn help" id="help" aria-label="Hilfe" aria-expanded="false">?</button>
+    </div>
+
+    <p class="hint" id="hint" role="status"></p>
+    <div id="gfilters"></div>
+    <div class="months" id="months"></div>
+    <div id="ov-wrap" hidden><h3 class="ov-month" id="ov-title"></h3><div class="ov-scroll"><table class="ov" id="ov-table"></table></div></div>
+    <ul class="legend" id="legend"></ul>
+    <div class="helpbox" id="helpbox" hidden>
+      <b style="color:var(--ink)">Tastatur:</b> <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> bewegen · <kbd>Leertaste</kbd> Tag auswählen · <kbd>Umschalt</kbd>+Pfeile Bereich · <kbd>B</kbd> belegt · <kbd>V</kbd> vielleicht · <kbd>Entf</kbd> wieder frei · <kbd>Esc</kbd> Auswahl aufheben · <kbd>Strg</kbd>+<kbd>Z</kbd> rückgängig
+    </div>
+  </section>
+
+  <p class="mock-note">Entwurf mit Beispieldaten. Nichts wird gespeichert.</p>
+</main>
+
+<div id="sheet-host"></div>
+<div id="toast-host"></div>
+
+<script>
+(() => {
+  const TODAY = "2026-11-20";
+  const ME = 1;
+  const members = [
+    { id: 1, name: "Kim", bg: "var(--maybe-soft)", fg: "var(--maybe-ink)" },
+    { id: 2, name: "Anna", bg: "var(--free-soft)", fg: "var(--ink)" },
+    { id: 3, name: "Ben", bg: "var(--accent-soft)", fg: "var(--ink)" },
+    { id: 4, name: "Carla", bg: "var(--busy-soft)", fg: "var(--ink)" },
+  ];
+
+  // ---- dates (all UTC, "YYYY-MM-DD")
+  const toDate = (d) => new Date(d + "T00:00:00Z");
+  const iso = (dt) => dt.toISOString().slice(0, 10);
+  const add = (d, n) => { const x = toDate(d); x.setUTCDate(x.getUTCDate() + n); return iso(x); };
+  const range = (a, b) => { if (a > b) [a, b] = [b, a]; const out = []; for (let d = a; d <= b; d = add(d, 1)) out.push(d); return out; };
+  const lastEditable = (() => { const x = toDate(TODAY); x.setUTCFullYear(x.getUTCFullYear() + 1); return iso(x); })();
+  const editable = (d) => d >= TODAY && d <= lastEditable;
+  const fLong = new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+  const fShort = new Intl.DateTimeFormat("de-DE", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  const fMonth = new Intl.DateTimeFormat("de-DE", { month: "long", timeZone: "UTC" });
+
+  // ---- sample data
+  const marks = new Map(); // `${uid}|${day}` -> { state, note }
+  const put = (uid, days, state, note) => days.forEach((d) => marks.set(uid + "|" + d, { state, note: note || "" }));
+  put(1, ["2026-11-21"], "busy", "Geburtstag Oma");
+  put(1, range("2027-01-04", "2027-01-06"), "busy", "Dienstreise");
+  put(1, range("2027-01-11", "2027-01-15"), "busy", "Urlaub");
+  put(1, range("2026-12-12", "2026-12-13"), "maybe", "Evtl. Familienbesuch");
+  put(2, range("2026-12-01", "2026-12-03"), "busy"); put(2, range("2026-12-24", "2026-12-26"), "busy", "Weihnachten in Köln"); put(2, ["2026-12-09"], "maybe");
+  put(3, range("2026-11-27", "2026-11-29"), "busy"); put(3, range("2026-12-31", "2027-01-01"), "busy"); put(3, range("2026-12-17", "2026-12-18"), "maybe");
+  put(4, range("2026-12-08", "2026-12-10"), "busy"); put(4, range("2027-01-08", "2027-01-10"), "busy"); put(4, ["2026-12-22"], "maybe");
+  const events = [{ title: "Probe", start: "2026-12-05", end: "2026-12-05" }, { title: "Gig im Lido", start: "2026-12-19", end: "2026-12-19" }];
+  const bank = { "2026-12-25": "1. Weihnachtstag", "2026-12-26": "2. Weihnachtstag", "2027-01-01": "Neujahr" };
+  const school = new Set(range("2026-12-23", "2027-01-02"));
+
+  const own = (d) => marks.get(ME + "|" + d);
+  const eventsOn = (d) => events.filter((e) => e.start <= d && d <= e.end);
+  const weekday = (d) => (toDate(d).getUTCDay() + 6) % 7; // Mo = 0
+  // Gruppe filters
+  let maybeFree = false;
+  const wdays = new Set([0, 1, 2, 3, 4, 5, 6]); // weekdays the group cares about, Mo = 0
+  const WD = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  let period = { months: 12 }; // or { from, to }
+  function periodRange() {
+    if (period.from) return [period.from, period.to];
+    const x = toDate(TODAY); x.setUTCMonth(x.getUTCMonth() + period.months);
+    const end = add(iso(x), -1);
+    return [TODAY, end < lastEditable ? end : lastEditable];
+  }
+  let runLength = 1; // "Tage am Stück", 1–14
+  const inPeriod = (d) => { const [a, b] = periodRange(); return a <= d && d <= b; };
+  const filteredOut = (d) => !wdays.has(weekday(d)) || (editable(d) && !inPeriod(d));
+  /** busy/maybe: who can't / might not. kind: the day's result under the "maybe counts as free" switch. */
+  function groupOn(d) {
+    const busy = [], maybe = [];
+    for (const m of members) { const k = marks.get(m.id + "|" + d); if (k?.state === "busy") busy.push(m); else if (k?.state === "maybe") maybe.push(m); }
+    const ev = eventsOn(d);
+    const missing = maybeFree ? busy : [...busy, ...maybe];
+    const kind = ev.length ? "event" : missing.length ? "missing" : maybe.length ? "maybe" : "free";
+    return { busy, maybe, ev, kind };
+  }
+  const noteSvg = `<svg class="note" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1.5h8a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5.5L3 10.5V8.5H2a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z" fill="currentColor"/></svg>`;
+
+  // ---- state
+  let tab = "mine"; // mine | group (the view follows the tab)
+  let layout = "cal"; // Gruppe: cal | table
+  const updated = { 1: "heute", 2: "vor 3 Tagen", 3: "vor 2 Wochen", 4: "vor 5 Tagen" };
+  let view = "mine";
+  let start = { y: 2026, m: 10 }; // month index 0-based
+  let selection = new Set();
+  let drag = null;
+  let toastTimer = 0;
+  let lastUndo = null;
+  const months = () => (matchMedia("(min-width: 720px)").matches ? 3 : 1);
+  const monthAdd = (ym, n) => { const t = ym.y * 12 + ym.m + n; return { y: Math.floor(t / 12), m: t % 12 }; };
+  const ymOf = (d) => ({ y: +d.slice(0, 4), m: +d.slice(5, 7) - 1 });
+  const ymIdx = (ym) => ym.y * 12 + ym.m;
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  $("faces").innerHTML = members.map((m) => `<span style="background:${m.bg};color:${m.fg}" title="${m.name}">${m.name[0]}</span>`).join("");
+
+  // ---- intro (remembered per browser)
+  let introSeen = false;
+  try { introSeen = localStorage.getItem("wp-intro") === "1"; } catch {}
+  $("intro").hidden = introSeen;
+  $("intro-ok").onclick = () => { $("intro").hidden = true; introSeen = true; try { localStorage.setItem("wp-intro", "1"); } catch {} };
+  $("help").onclick = () => {
+    const open = $("helpbox").hidden;
+    $("helpbox").hidden = !open;
+    if (open) $("intro").hidden = false;
+    $("help").setAttribute("aria-expanded", String(open));
+    if (open) $("intro").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // ---- rendering
+  function cellHtml(d, inMonth) {
+    if (!inMonth) return `<span></span>`;
+    const o = own(d), g = groupOn(d), cls = ["cell"];
+    if (!editable(d)) cls.push("past");
+    if (d === TODAY) cls.push("today");
+    if (selection.has(d)) cls.push("selected");
+    if (o) cls.push(o.state);
+    cls.push("g-" + g.kind);
+    if (bank[d]) cls.push("bank");
+    if (view === "group" && filteredOut(d)) cls.push("dim");
+    const tip = [fShort.format(toDate(d))];
+    if (bank[d]) tip.push(bank[d]);
+    if (school.has(d)) tip.push("Schulferien Berlin");
+    g.ev.forEach((e) => tip.push("Termin: " + e.title));
+    if (view === "mine") {
+      if (o) tip.push("Du: " + (o.state === "busy" ? "belegt" : "vielleicht") + (o.note ? " (" + o.note + ")" : ""));
+    } else {
+      if (g.busy.length) tip.push("Kann nicht: " + g.busy.map((m) => m.name).join(", "));
+      if (g.maybe.length) tip.push("Vielleicht: " + g.maybe.map((m) => m.name).join(", "));
+    }
+    let inner = `<span class="num">${+d.slice(8)}</span>`;
+    if (g.ev.length) inner += `<span class="ev"></span>`;
+    if (school.has(d)) {
+      const s = !school.has(add(d, -1)) || weekday(d) === 0 ? " s" : "";
+      const e = !school.has(add(d, 1)) || weekday(d) === 6 ? " e" : "";
+      inner += `<span class="school${s}${e}"></span>`;
+    }
+    if (bank[d]) inner += `<span class="hol" aria-hidden="true">✦</span>`;
+    if (view === "mine" && o?.note) inner += noteSvg;
+    if (view === "group") {
+      // One box per member, always in the same order (you first): empty = can, amber = maybe, red = can't.
+      const boxes = members.map((m) => {
+        const s = marks.get(m.id + "|" + d)?.state;
+        return `<i class="${s === "busy" ? "b" : s === "maybe" ? "m" : "f"}"></i>`;
+      });
+      inner += `<span class="bar" aria-hidden="true">${boxes.join("")}</span>`;
+      cls.push("has-bar");
+    }
+    return `<button type="button" class="${cls.join(" ")}" data-day="${d}" title="${esc(tip.join(" · "))}" aria-pressed="${selection.has(d)}" ${editable(d) ? "" : 'aria-disabled="true"'}>${inner}</button>`;
+  }
+
+  function renderMonths() {
+    const n = months();
+    const host = $("months");
+    host.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+    host.className = "months view-" + view;
+    let html = "";
+    for (let i = 0; i < n; i++) {
+      const ym = monthAdd(start, i);
+      const first = `${ym.y}-${String(ym.m + 1).padStart(2, "0")}-01`;
+      const lead = (toDate(first).getUTCDay() + 6) % 7;
+      const nDays = new Date(Date.UTC(ym.y, ym.m + 1, 0)).getUTCDate();
+      html += `<div class="month"><h3>${fMonth.format(toDate(first))} <small>${ym.y}</small></h3><div class="grid">`;
+      html += ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((w, j) => `<div class="wd${j > 4 ? " we" : ""}">${w}</div>`).join("");
+      for (let j = 0; j < lead; j++) html += cellHtml(null, false);
+      for (let day = 1; day <= nDays; day++) html += cellHtml(add(first, day - 1), true);
+      html += `</div></div>`;
+    }
+    host.innerHTML = html;
+    $("prev").disabled = false;
+    $("next").disabled = ymIdx(monthAdd(start, n - 1)) >= ymIdx(ymOf(lastEditable));
+  }
+
+  function renderHint() {
+    const h = $("hint");
+    const n = selection.size;
+    h.classList.toggle("active", n > 0);
+    let text;
+    if (view === "group" && layout === "table") text = "Jede Zeile ist ein Mitglied. Die Zeile „Gruppe“ zeigt grün, wann alle können. Tippe dort auf einen Tag für Details.";
+    else if (view === "group") text = "Grün heißt: alle können. Die Kästchen im Tag stehen für die einzelnen Mitglieder. Tippe einen Tag an, um zu sehen, wer kann.";
+    else if (n > 0) text = `${n === 1 ? "1 Tag" : n + " Tage"} ausgewählt. Tippe weitere Tage an oder sag unten, was gilt.`;
+    else text = "Tippe die Tage an, an denen du nicht kannst. Am Computer kannst du auch über mehrere Tage ziehen.";
+    h.classList.toggle("active", n > 0 && view === "mine");
+    h.innerHTML = `<span class="ico">${n > 0 && view === "mine" ? "✓" : "i"}</span><span>${text}</span>`;
+  }
+
+  /** Every run of `runLength` days inside the period where each day is a chosen weekday and everyone can. */
+  function matchingRuns() {
+    const ok = (d) => wdays.has(weekday(d)) && ["free", "maybe"].includes(groupOn(d).kind);
+    const out = [];
+    const [from, to] = periodRange();
+    for (let d = from; add(d, runLength - 1) <= to; d = add(d, 1)) {
+      const run = range(d, add(d, runLength - 1));
+      if (run.every(ok)) out.push(run);
+    }
+    return out;
+  }
+
+  function renderFilters() {
+    const host = $("gfilters");
+    if (view !== "group") { host.innerHTML = ""; return; }
+    const cchip = (attr, on, label) => `<button class="cchip" ${attr} aria-pressed="${on}"><span class="box">✓</span>${label}</button>`;
+    const weekdays = WD.map((w, i) => cchip(`data-wd="${i}"`, wdays.has(i), w)).join("");
+    const filtered = wdays.size < 7 || maybeFree || !!period.from || period.months !== 12 || runLength !== 1;
+    const periodBtns = [1, 3, 6, 12].map((n) => `<button data-months="${n}" aria-pressed="${!period.from && period.months === n}">${n === 1 ? "1 Monat" : n + " Monate"}</button>`).join("")
+      + `<button data-months="custom" aria-pressed="${!!period.from}">Eigener</button>`;
+    const dates = period.from
+      ? `<span class="dates"><input type="date" id="p-from" aria-label="Von" min="${TODAY}" max="${lastEditable}" value="${period.from}"> bis <input type="date" id="p-to" aria-label="Bis" min="${TODAY}" max="${lastEditable}" value="${period.to}"></span>`
+      : "";
+    const all = matchingRuns();
+    const byMonth = new Map();
+    for (const run of all) { const k = run[0].slice(0, 7); if (!byMonth.has(k)) byMonth.set(k, []); byMonth.get(k).push(run); }
+    const fDay = new Intl.DateTimeFormat("de-DE", { weekday: "short", day: "numeric", timeZone: "UTC" });
+    const fMon = new Intl.DateTimeFormat("de-DE", { month: "short", year: "2-digit", timeZone: "UTC" });
+    host.innerHTML = `
+      <div class="finder">
+        <div class="finder-head">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14l-5.5 6.5V16l-3 1.5v-7L3 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <b>Passende Tage finden</b>
+          ${filtered ? `<button class="reset" id="f-reset">Filter zurücksetzen</button>` : ""}
+        </div>
+        <div class="frow"><span class="flabel">In welchem Zeitraum?<small>Ab heute. Tage außerhalb werden blass.</small></span><div class="fopts"><div class="seg" role="group" aria-label="Zeitraum">${periodBtns}</div>${dates}</div></div>
+        <div class="frow"><span class="flabel">Wie viele Tage am Stück?<small>Zum Beispiel 2 für ein Wochenende.</small></span><div class="fopts"><span class="stepper"><button class="icon-btn" id="run-minus" aria-label="Weniger Tage" ${runLength <= 1 ? "disabled" : ""}>−</button><output id="run-n">${runLength === 1 ? "1 Tag" : runLength + " Tage"}</output><button class="icon-btn" id="run-plus" aria-label="Mehr Tage" ${runLength >= 14 ? "disabled" : ""}>+</button></span></div></div>
+        <div class="frow"><span class="flabel">An welchen Wochentagen?<small>Andere Tage werden blass.</small></span><div class="fopts">${weekdays}
+          <span class="presets"><button data-preset="all">Alle</button><button data-preset="we">Wochenende</button><button data-preset="wd">Mo–Fr</button></span></div></div>
+        <div class="frow"><span class="flabel">Unsichere Tage</span><div class="fopts"><button class="switch" id="f-maybe" aria-pressed="${maybeFree}"><span class="track"></span>„Vielleicht“ zählt als frei</button></div></div>
+        <div class="result">
+          <span class="flabel">Passende Tage<small>${all.length} ${runLength === 1 ? (all.length === 1 ? "Tag" : "Tage") : all.length === 1 ? "Zeitraum" : "Zeiträume"} im gewählten Zeitraum, an denen alle können</small></span>
+          ${all.length ? `<div class="matches">${[...byMonth].map(([k, runs]) => `<div class="mgroup"><span class="mname">${fMon.format(toDate(k + "-01"))}</span>${runs.map((run) => {
+            const a = run[0], z = run[run.length - 1];
+            const label = a === z ? fDay.format(toDate(a)) : `${fDay.format(toDate(a))} – ${a.slice(0, 7) === z.slice(0, 7) ? fDay.format(toDate(z)) : fShort.format(toDate(z))}`;
+            return `<button class="bchip" data-best="${a}" data-end="${z}" title="${fLong.format(toDate(a))}${a === z ? "" : " bis " + fLong.format(toDate(z))}">${label}</button>`;
+          }).join("")}</div>`).join("")}</div>`
+            : `<span class="none">Kein Tag passt. Wähl einen längeren Zeitraum, mehr Wochentage oder lass „Vielleicht“ als frei zählen.</span>`}
+        </div>
+      </div>`;
+    if ($("f-reset")) $("f-reset").onclick = () => { WD.forEach((_, i) => wdays.add(i)); maybeFree = false; period = { months: 12 }; runLength = 1; renderAll(); };
+    $("run-minus").onclick = () => { runLength = Math.max(1, runLength - 1); renderAll(); };
+    $("run-plus").onclick = () => { runLength = Math.min(14, runLength + 1); renderAll(); };
+    host.querySelectorAll("[data-months]").forEach((b) => (b.onclick = () => {
+      const v = b.dataset.months;
+      if (v === "custom") { if (!period.from) { const [a, z] = periodRange(); period = { from: a, to: z }; } }
+      else period = { months: +v };
+      renderAll();
+    }));
+    const clampDay = (v) => (v < TODAY ? TODAY : v > lastEditable ? lastEditable : v);
+    if ($("p-from")) {
+      $("p-from").onchange = (e) => { if (!e.target.value) return; period.from = clampDay(e.target.value); if (period.to < period.from) period.to = period.from; renderAll(); };
+      $("p-to").onchange = (e) => { if (!e.target.value) return; period.to = clampDay(e.target.value); if (period.to < period.from) period.from = period.to; renderAll(); };
+    }
+    host.querySelectorAll("[data-preset]").forEach((b) => (b.onclick = () => {
+      const p = { all: [0, 1, 2, 3, 4, 5, 6], we: [5, 6], wd: [0, 1, 2, 3, 4] }[b.dataset.preset];
+      wdays.clear(); p.forEach((i) => wdays.add(i)); renderAll();
+    }));
+    $("f-maybe").onclick = () => { maybeFree = !maybeFree; renderAll(); };
+    host.querySelectorAll("[data-wd]").forEach((b) => (b.onclick = () => {
+      const i = +b.dataset.wd;
+      if (wdays.has(i)) { if (wdays.size > 1) wdays.delete(i); } else wdays.add(i);
+      renderAll();
+    }));
+    host.querySelectorAll(".bchip").forEach((b) => (b.onclick = () => {
+      const d = b.dataset.best;
+      const i = ymIdx(ymOf(d));
+      if (i < ymIdx(start) || i > ymIdx(start) + months() - 1) start = ymOf(d);
+      selection = new Set(range(d, b.dataset.end));
+      renderAll();
+    }));
+  }
+
+  function renderLegend() {
+    const common = `<li><span class="sw sw-ev"></span>Gruppentermin</li><li><span class="sw sw-hol">✦</span>Feiertag</li><li><span class="sw sw-school"></span>Schulferien</li>`;
+    if (view === "group" && layout === "table") {
+      $("legend").innerHTML = `<li><span class="sw sw-busy"></span>Kann nicht</li><li><span class="sw sw-maybe"></span>Vielleicht</li><li><span class="sw sw-free"></span>Kann</li><li><span class="sw sw-gfree"></span>Gruppe: alle können</li><li><span class="sw sw-gmissing"></span>Gruppe: Zahl = wie viele nicht können</li>${common}`;
+      return;
+    }
+    $("legend").innerHTML = view === "mine"
+      ? `<li><span class="sw sw-busy"></span>Ich kann nicht</li><li><span class="sw sw-maybe"></span>Ich kann vielleicht</li><li><span class="sw sw-free"></span>Ich kann</li><li><span class="sw sw-note">${noteSvg.replace('class="note"', 'width="14" height="14"')}</span>Mit Notiz</li>${common}`
+      : `<li><span class="sw sw-gfree"></span>Alle können</li><li><span class="sw sw-gmaybe"></span>Alle können, manche nur vielleicht</li><li><span class="sw-bar"><i class="f"></i><i class="m"></i><i class="b"></i><i class="f"></i></span>Ein Kästchen pro Person (${members.map((m) => (m.id === ME ? "Du" : m.name)).join(", ")}): leer = kann, gelb = vielleicht, rot = kann nicht</li>${common}`;
+  }
+
+  function renderSheet() {
+    const host = $("sheet-host");
+    if (!selection.size) { host.innerHTML = ""; return; }
+    if (view === "group") { renderSummary(); return; }
+    const days = [...selection].sort();
+    const states = new Set(days.map((d) => own(d)?.state || "free"));
+    const single = days.length === 1 ? days[0] : null;
+    let title, sub = "", chips = "";
+    if (single) {
+      const o = own(single), g = groupOn(single);
+      title = fLong.format(toDate(single));
+      const bits = [];
+      bits.push(`Bisher: <b>${o ? (o.state === "busy" ? "belegt" : "vielleicht") : "frei"}</b>`);
+      if (bank[single]) bits.push(bank[single]);
+      if (school.has(single)) bits.push("Schulferien");
+      g.ev.forEach((e) => bits.push("Termin: <b>" + esc(e.title) + "</b>"));
+      sub = bits.join(" · ");
+    } else {
+      title = `${days.length} Tage ausgewählt`;
+      const shown = days.slice(0, 8).map((d) => `<span class="chip">${fShort.format(toDate(d))}</span>`).join("");
+      chips = `<div class="chips">${shown}${days.length > 8 ? `<span class="chip">+${days.length - 8}</span>` : ""}</div>`;
+    }
+    const opts = [
+      { s: "busy", label: "Belegt", hint: "Ich kann nicht", sw: "sw-busy" },
+      { s: "maybe", label: "Vielleicht", hint: "Noch unsicher", sw: "sw-maybe" },
+      { s: "free", label: "Wieder frei", hint: "Markierung löschen", sw: "sw-free" },
+    ].filter((o) => !(states.size === 1 && states.has(o.s)));
+    const allSame = states.size === 1 ? [...states][0] : null;
+    const question = allSame === "free" ? `Kannst du an ${single ? "diesem Tag" : "diesen Tagen"} nicht?`
+      : allSame ? `Diese ${single ? "Markierung" : "Markierungen"} ändern?` : "Was gilt für diese Tage?";
+    const curNote = single ? own(single)?.note || "" : "";
+    host.innerHTML = `
+      <div class="sheet" role="dialog" aria-label="Ausgewählte Tage">
+        <div class="sheet-top">
+          <div><p class="sheet-title">${title}</p>${sub ? `<p class="sheet-sub">${sub}</p>` : ""}${chips}</div>
+          <button class="icon-btn close" id="sheet-close" aria-label="Auswahl aufheben">✕</button>
+        </div>
+        <p class="question">${question}</p>
+        <div class="choices">${opts.map((o) => `<button class="choice" data-state="${o.s}"><span class="sw ${o.sw}"></span><span>${o.label}<small>${o.hint}</small></span></button>`).join("")}</div>
+        <div class="note-row"><input id="note" maxlength="80" placeholder="Notiz, optional (z. B. „Urlaub“)" value="${esc(curNote)}" aria-label="Notiz"></div>
+      </div>`;
+    $("sheet-close").onclick = () => { selection.clear(); renderAll(); };
+    host.querySelectorAll(".choice").forEach((b) => (b.onclick = () => apply(b.dataset.state)));
+    $("note").onkeydown = (e) => {
+      if (e.key !== "Enter") return;
+      const marked = days.filter((d) => own(d));
+      if (marked.length) { // Enter on a marked day saves only the note
+        const prev = marked.map((d) => [d, { ...own(d) }]);
+        marked.forEach((d) => (own(d).note = e.target.value.trim()));
+        lastUndo = prev; selection.clear(); renderAll(); toast("Notiz gespeichert");
+      }
+    };
+  }
+
+  /** Gruppe view: who can on the chosen day (or range), plus holidays and events. */
+  function renderSummary() {
+    const host = $("sheet-host");
+    const days = [...selection].sort();
+    const n = days.length, single = n === 1 ? days[0] : null;
+    const rows = members.map((m) => {
+      let b = 0, mb = 0, note = "";
+      for (const d of days) {
+        const k = marks.get(m.id + "|" + d);
+        if (k?.state === "busy") b++; else if (k?.state === "maybe") mb++;
+        if (single && k?.note) note = k.note;
+      }
+      const st = b ? "b" : mb ? "m" : "f";
+      const text = single ? (b ? "kann nicht" : mb ? "vielleicht" : "kann")
+        : b ? `an ${b} von ${n} Tagen nicht` : mb ? `an ${mb} von ${n} Tagen vielleicht` : "kann an allen Tagen";
+      return { m, st, text, note };
+    }); // same order as the boxes in the calendar and the rows in the table: you first, then by name
+    const req = rows;
+    const nb = req.filter((r) => r.st === "b" || (!maybeFree && r.st === "m")).length;
+    const nm = req.filter((r) => r.st === "m").length;
+    const [status, cls] = nb ? [`${nb} ${nb === 1 ? "kann" : "können"} nicht`, "bad"] : nm ? [`Alle können, ${nm} nur vielleicht`, "meh"] : ["Alle können", "good"];
+    const extras = [];
+    days.forEach((d) => bank[d] && extras.push(`<span class="x-hol">✦ ${bank[d]}</span>`));
+    if (days.some((d) => school.has(d))) extras.push(`<span class="x-sc">Schulferien Berlin</span>`);
+    const evs = new Set(days.flatMap((d) => eventsOn(d).map((e) => e.title)));
+    evs.forEach((t) => extras.push(`<span class="x-ev">Termin: ${esc(t)}</span>`));
+    const title = single ? fLong.format(toDate(single)) : `${fShort.format(toDate(days[0]))} – ${fShort.format(toDate(days[n - 1]))}`;
+    host.innerHTML = `
+      <div class="pop" role="dialog" aria-label="Details für ${esc(title)}">
+        <div class="pop-head">
+          <div><p class="sheet-title">${title}</p><span class="status ${cls}">${single ? "" : n + " Tage · "}${status}</span></div>
+          <button class="icon-btn close" id="sheet-close" aria-label="Schließen">✕</button>
+        </div>
+        <ul class="mlist">${rows.map((r) => `
+          <li class="mrow"><span class="av" style="background:${r.m.bg};color:${r.m.fg}">${r.m.name[0]}</span>
+            <span><span class="nm">${r.m.id === ME ? "Du" : r.m.name}</span>${r.note ? `<span class="nt">„${esc(r.note)}“</span>` : ""}</span>
+            <span class="st st-${r.st}">${r.text}</span></li>`).join("")}
+        </ul>
+        ${extras.length ? `<div class="extras">${extras.join("")}</div>` : ""}
+        <div class="pop-actions">
+          <button class="btn" id="plan">Termin planen</button>
+          ${single && editable(single) ? `<button class="btn ghost" id="mine-edit">Meinen Eintrag ändern</button>` : ""}
+        </div>
+      </div>`;
+    $("sheet-close").onclick = () => { selection.clear(); renderAll(); };
+    $("plan").onclick = () => { selection.clear(); renderAll(); toast(`Hier öffnet sich der Termin-Dialog für ${n === 1 ? "diesen Tag" : "diese " + n + " Tage"}`); };
+    if ($("mine-edit")) $("mine-edit").onclick = () => {
+      const d = [...selection][0];
+      tab = "mine"; view = "mine";
+      if (ymIdx(ymOf(d)) < ymIdx(start) || ymIdx(ymOf(d)) > ymIdx(start) + months() - 1) start = ymOf(d);
+      renderAll();
+    };
+    placePop();
+  }
+
+  function placePop() {
+    const pop = document.querySelector(".pop");
+    if (!pop || !matchMedia("(min-width: 721px)").matches) return;
+    const last = [...selection].sort().at(-1);
+    const cell = [...document.querySelectorAll(`[data-day="${last}"]`)].find((el) => el.offsetParent);
+    if (!cell) { pop.style.left = "50%"; pop.style.top = scrollY + 120 + "px"; return; }
+    const r = cell.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12));
+    let top = r.bottom + 12;
+    if (top + h > innerHeight - 12 && r.top - h - 12 > 12) top = r.top - h - 12;
+    pop.style.left = left + scrollX + "px";
+    pop.style.top = top + scrollY + "px";
+  }
+
+  /** Gruppe as a table: one month, a row per member, plus a "Gruppe" row on top. */
+  function renderOverview() {
+    if (!(view === "group" && layout === "table")) return;
+    const ym = start;
+    const first = `${ym.y}-${String(ym.m + 1).padStart(2, "0")}-01`;
+    const nDays = new Date(Date.UTC(ym.y, ym.m + 1, 0)).getUTCDate();
+    const days = Array.from({ length: nDays }, (_, i) => add(first, i));
+    $("ov-title").textContent = `${fMonth.format(toDate(first))} ${ym.y}`;
+    const head = days.map((d) => {
+      const cls = ["ovh"];
+      if (filteredOut(d)) cls.push("dim");
+      if (weekday(d) > 4) cls.push("we");
+      if (d === TODAY) cls.push("today");
+      if (bank[d]) cls.push("bank");
+      let inner = "";
+      if (eventsOn(d).length) inner += `<span class="ev"></span>`;
+      if (bank[d]) inner += `<span class="hol" aria-hidden="true">✦</span>`;
+      if (school.has(d)) {
+        const s = !school.has(add(d, -1)) || d === first ? " s" : "";
+        const e = !school.has(add(d, 1)) || d === days[nDays - 1] ? " e" : "";
+        inner += `<span class="school${s}${e}"></span>`;
+      }
+      const tip = [fShort.format(toDate(d)), bank[d], school.has(d) && "Schulferien Berlin", ...eventsOn(d).map((e) => "Termin: " + e.title)].filter(Boolean).join(" · ");
+      return `<th class="${cls.join(" ")}" title="${esc(tip)}">${inner}<span class="wdl">${WD[weekday(d)]}</span><span class="dn">${+d.slice(8)}</span></th>`;
+    }).join("");
+    const sum = days.map((d) => {
+      const g = groupOn(d);
+      const n = maybeFree ? g.busy.length : g.busy.length + g.maybe.length;
+      const tip = g.kind === "free" ? "Alle können" : g.kind === "maybe" ? "Alle können, manche nur vielleicht" : g.kind === "event" ? "Gruppentermin" : `${n} ${n === 1 ? "kann" : "können"} nicht`;
+      return `<td class="g-${g.kind}${editable(d) ? "" : " past"}${filteredOut(d) ? " dim" : ""}${selection.has(d) ? " selected" : ""}" data-day="${d}" title="${tip}">${g.kind === "missing" ? n : ""}</td>`;
+    }).join("");
+    const rows = members.map((m) => `<tr><th class="name"><div><span class="av" style="background:${m.bg};color:${m.fg}">${m.name[0]}</span><span>${m.id === ME ? "Du" : m.name}<small>aktualisiert ${updated[m.id]}</small></span></div></th>${days.map((d) => {
+      const k = marks.get(m.id + "|" + d);
+      const tip = `${m.name}, ${fShort.format(toDate(d))}: ${k ? (k.state === "busy" ? "kann nicht" : "vielleicht") : "kann"}${k?.note ? " („" + k.note + "“)" : ""}`;
+      return `<td class="${k ? k.state : ""}${editable(d) ? "" : " past"}${filteredOut(d) ? " dim" : ""}" title="${esc(tip)}">${k?.note ? noteSvg : ""}</td>`;
+    }).join("")}</tr>`).join("");
+    $("ov-table").innerHTML = `<thead><tr><th class="name"></th>${head}</tr></thead><tbody><tr class="sum"><th class="name"><div><span>Gruppe<small>Tippen für Details</small></span></div></th>${sum}</tr><tr class="gap"><th></th></tr>${rows}</tbody>`;
+  }
+  $("ov-table").addEventListener("click", (e) => {
+    const d = e.target.closest("tr.sum td[data-day]")?.dataset.day;
+    if (!d) return;
+    selection = selection.size === 1 && selection.has(d) ? new Set() : new Set([d]);
+    renderOverview(); renderSheet();
+  });
+  document.querySelectorAll(".tabs a").forEach((a) => (a.onclick = (e) => {
+    e.preventDefault();
+    if (a.dataset.tab === "set") { toast("Einstellungen sind nicht Teil dieses Entwurfs"); return; }
+    if (a.dataset.tab === tab) return;
+    tab = a.dataset.tab; view = tab; selection.clear();
+    if (tab === "mine") $("intro").hidden = introSeen;
+    renderAll();
+  }));
+
+  function apply(state) {
+    const note = ($("note")?.value || "").trim();
+    const days = [...selection].sort();
+    lastUndo = days.map((d) => [d, own(d) ? { ...own(d) } : null]);
+    for (const d of days) {
+      if (state === "free") marks.delete(ME + "|" + d);
+      else marks.set(ME + "|" + d, { state, note: note || own(d)?.note || "" });
+    }
+    selection.clear();
+    renderAll();
+    const what = state === "busy" ? "als belegt markiert" : state === "maybe" ? "als vielleicht markiert" : "wieder frei";
+    toast(`${days.length === 1 ? "1 Tag" : days.length + " Tage"} ${what}`);
+  }
+
+  function undo() {
+    if (!lastUndo) return;
+    for (const [d, m] of lastUndo) { if (m) marks.set(ME + "|" + d, m); else marks.delete(ME + "|" + d); }
+    lastUndo = null; renderAll(); $("toast-host").innerHTML = "";
+  }
+
+  function toast(text) {
+    clearTimeout(toastTimer);
+    $("toast-host").innerHTML = `<div class="toast" role="status"><span>${text}</span><button id="undo">Rückgängig</button></div>`;
+    $("undo").onclick = undo;
+    toastTimer = setTimeout(() => ($("toast-host").innerHTML = ""), 6000);
+  }
+
+  function renderAll() {
+    $("add-event").hidden = view !== "group"; // group events belong to the Gruppe view
+    document.querySelectorAll(".tabs a").forEach((a) => (a.dataset.tab === tab ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
+    if (tab !== "mine") $("intro").hidden = true;
+    const table = view === "group" && layout === "table";
+    $("layout-seg").hidden = view !== "group";
+    $("l-cal").setAttribute("aria-pressed", String(layout === "cal"));
+    $("l-table").setAttribute("aria-pressed", String(layout === "table"));
+    $("months").hidden = table;
+    $("ov-wrap").hidden = !table;
+    renderFilters(); renderMonths(); renderHint(); renderLegend(); renderOverview(); renderSheet();
+    if (selection.size) $("toast-host").innerHTML = "";
+  }
+
+  // ---- selection: tap toggles a day, mouse drag adds a range
+  const dayAt = (x, y) => document.elementFromPoint(x, y)?.closest("[data-day]")?.dataset.day;
+  function paintSelection() {
+    document.querySelectorAll("#months [data-day]").forEach((el) => {
+      const on = selection.has(el.dataset.day);
+      el.classList.toggle("selected", on); el.setAttribute("aria-pressed", String(on));
+    });
+  }
+  $("months").addEventListener("pointerdown", (e) => {
+    const d = e.target.closest("[data-day]")?.dataset.day;
+    if (!d || !editable(d) || e.button !== 0) return;
+    // Gruppe: one day (or one dragged range) at a time; Meine Tage: taps add up.
+    drag = { anchor: d, base: view === "group" ? new Set() : new Set(selection), moved: false, touch: e.pointerType === "touch" };
+    if (!drag.touch) e.preventDefault();
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (!drag || drag.touch) return;
+    const d = dayAt(e.clientX, e.clientY);
+    if (!d || (d === drag.anchor && !drag.moved)) return;
+    drag.moved = true;
+    selection = new Set([...drag.base, ...range(drag.anchor, d).filter(editable)]);
+    paintSelection(); renderHint();
+  });
+  window.addEventListener("pointerup", () => {
+    if (!drag) return;
+    const { anchor, moved } = drag; drag = null;
+    if (!moved) {
+      if (view === "group") selection = selection.size === 1 && selection.has(anchor) ? new Set() : new Set([anchor]);
+      else selection.has(anchor) ? selection.delete(anchor) : selection.add(anchor);
+    }
+    renderAll();
+  });
+  // Gruppe: a tap outside the summary closes it.
+  document.addEventListener("pointerdown", (e) => {
+    if (view === "group" && selection.size && !e.target.closest(".pop, [data-day]")) {
+      selection.clear(); $("sheet-host").innerHTML = ""; paintSelection();
+      document.querySelectorAll(".ov td.selected").forEach((el) => el.classList.remove("selected"));
+    }
+  });
+  window.addEventListener("resize", placePop);
+  $("months").addEventListener("pointercancel", () => (drag = null)); // a scroll on touch
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && selection.size) { selection.clear(); renderAll(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") undo();
+  });
+
+  // ---- toolbar
+  $("l-cal").onclick = () => { layout = "cal"; selection.clear(); renderAll(); };
+  $("l-table").onclick = () => { layout = "table"; selection.clear(); renderAll(); };
+  const go = (ym) => { start = ym; if (view === "group") selection.clear(); renderAll(); };
+  $("prev").onclick = () => go(monthAdd(start, -1));
+  $("next").onclick = () => go(monthAdd(start, 1));
+  $("today").onclick = () => go(ymOf(TODAY));
+  $("add-event").onclick = () => toast("Hier öffnet sich der Termin-Dialog (unverändert)");
+  let lastN = months();
+  window.addEventListener("resize", () => { if (months() !== lastN) { lastN = months(); renderMonths(); } });
+
+  renderAll();
+})();
+</script>

@@ -1,0 +1,79 @@
+#cloud-config
+# The server's baseline (P7, docs/runbooks/server.md). `make server-create` passes it to
+# Hetzner with your SSH public key in place of SSH_PUBLIC_KEY.
+#
+# One login: `deploy`, by key only. It's in the docker group, which is root in all but
+# name, so it may sudo without a password too: the deploy installs the backup's systemd
+# units, and the backup reads root-only secrets. root can't log in at all.
+#
+# Ports: the Hetzner Cloud Firewall in front of the box is the one that counts. ufw below
+# allows the same ports, but Docker's published ports (Caddy's 80/443) bypass ufw.
+#
+# The backup's systemd units are NOT installed here: `make deploy` copies them from the
+# release it ships (infra/backup/), so a change to them goes out like any other change,
+# and `make backup-init` turns the timer on once the Storage Box is set up.
+
+users:
+  - name: deploy
+    shell: /bin/bash
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+      - SSH_PUBLIC_KEY
+disable_root: true
+ssh_pwauth: false
+
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - unattended-upgrades
+  - ufw
+  # The nightly backup (infra/backup/backup.sh) runs on the host.
+  - restic
+  - sqlite3
+
+write_files:
+  - path: /etc/ssh/sshd_config.d/10-wannpassts.conf
+    content: |
+      PermitRootLogin no
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      AllowUsers deploy
+  # Security updates daily; a reboot when one needs it, after the backup (03:30 Berlin).
+  # The server's clock is UTC: 04:30 UTC is 05:30/06:30 in Berlin.
+  - path: /etc/apt/apt.conf.d/52wannpassts
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      Unattended-Upgrade::Automatic-Reboot "true";
+      Unattended-Upgrade::Automatic-Reboot-Time "04:30";
+
+runcmd:
+  # Docker Engine and the Compose plugin from Docker's own repository.
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  - - sh
+    - -c
+    - >-
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc]
+      https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable"
+      > /etc/apt/sources.list.d/docker.list
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  - usermod -aG docker deploy
+  # /srv/wannpassts: .env (settings), releases/<sha> (shipped infra/), current -> the
+  # running release. data/ is the app's SQLite and backup/ the nightly copy of it, both
+  # owned by the app's uid 10001 (infra/Dockerfile). secrets/ is root's only.
+  - install -d -m 0755 -o deploy -g deploy /srv/wannpassts /srv/wannpassts/releases
+  - install -d -m 0700 -o 10001 -g 10001 /srv/wannpassts/data /srv/wannpassts/backup
+  - install -d -m 0700 -o root -g root /srv/wannpassts/secrets
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw allow 443/udp
+  - ufw --force enable
+  - systemctl restart ssh

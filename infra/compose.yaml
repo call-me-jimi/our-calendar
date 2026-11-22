@@ -1,0 +1,46 @@
+# Base stack, shared by the laptop (compose.dev.yaml) and the server (compose.prod.yaml, P7).
+# Only Caddy is reachable from outside. The app publishes no ports; besides the internal network it
+# joins `egress` for outbound calls only (OpenHolidays, SMTP).
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    image: wannpassts:${GIT_SHA:-dev}
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      BASE_URL: ${BASE_URL:?set BASE_URL in .env}
+      OPERATOR_NAME: ${OPERATOR_NAME:-}
+    volumes:
+      - app_data:/data
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [internal, egress]
+
+  caddy:
+    image: caddy:2.11.9
+    restart: unless-stopped
+    logging: *logging
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [internal, edge]
+    depends_on:
+      app: { condition: service_healthy }
+
+networks:
+  internal:
+    internal: true
+  edge: {}
+  egress: {}
+
+volumes:
+  app_data:
+  caddy_data:
+  caddy_config:

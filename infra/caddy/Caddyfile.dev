@@ -1,0 +1,15 @@
+# Laptop: https://wann.localhost:8444 with Caddy's own local CA.
+# Headers match spec §6.2 (headers.caddy, shared with Caddyfile.prod, which adds HSTS).
+{
+	local_certs
+	auto_https disable_redirects
+	admin off
+}
+
+import headers.caddy
+
+wann.localhost {
+	encode zstd gzip
+	import security_headers
+	reverse_proxy app:8000
+}

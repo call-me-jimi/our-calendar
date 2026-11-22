@@ -1,0 +1,11 @@
+# Security headers, spec §6.2. Imported by Caddyfile.dev and Caddyfile.prod, which add HSTS.
+(security_headers) {
+	header {
+		Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		-Server
+		-Via
+	}
+}

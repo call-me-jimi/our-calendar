@@ -1,0 +1,43 @@
+# Server: https://{$DOMAIN} with a Let's Encrypt certificate (spec §6.2, §6.3; P7).
+# DOMAIN, OLD_DOMAIN and ACME_EMAIL come from /srv/wannpassts/.env via infra/compose.prod.yaml.
+{
+	admin off
+	# `email <address>` when ACME_EMAIL is set, else nothing: the ACME account needs none.
+	{$ACME_EMAIL_OPTION}
+}
+
+import headers.caddy
+
+{$DOMAIN} {
+	encode zstd gzip
+	import security_headers
+	# No preload and no includeSubDomains: sslip.io isn't ours.
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy app:8000
+
+	# Kept 7 days: a new file each day, old ones deleted after a week. Caddy never logs
+	# request bodies, and redacts Cookie and Authorization. The tokens in invite and feed
+	# URLs are cut out too; sign-in tokens sit in the URL fragment, which never arrives.
+	log {
+		output file /var/log/caddy/access.log {
+			roll_interval 24h
+			roll_keep_for 168h
+		}
+		format filter {
+			request>uri regexp "^/(api/join|join|feed)/[^/?]+" "/${1}/REDACTED"
+		}
+	}
+}
+
+# The app's old name, if OLD_DOMAIN is set in .env: everything moves to DOMAIN, same path
+# (301). Not logged, so the tokens in old invite links never reach a log. Without OLD_DOMAIN
+# this is an unused loopback port (compose.prod.yaml), as Caddy needs some address here.
+{$REDIRECT_FROM} {
+	redir https://{$DOMAIN}{uri} permanent
+}
+
+# For Docker's healthcheck only: on the container's loopback, not published.
+http://127.0.0.1:8081 {
+	bind 127.0.0.1
+	respond "ok"
+}
