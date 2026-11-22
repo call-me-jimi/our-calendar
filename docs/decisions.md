@@ -5,6 +5,7 @@ in the parent workspace (Q-numbers refer to it).
 
 | Date | Decision | Source |
 | --- | --- | --- |
+| 2026-11-22 | The name follows the language: **"Unser Kalender"** in German (header, page title, sign-in mail, privacy note), "Our Calendar" in English. The manifest holds one name, so the home-screen name stays "Our Calendar" | owner |
 | 2026-11-22 | Renamed to **"Our Calendar"** (UI, mail, manifest, Python package `ourcalendar`, repo `our-calendar`); the server-side names stay `wannpassts` (`/srv/wannpassts`, Compose project, image tags, systemd units, Hetzner resources, restic host) so the live server and rollbacks keep working. Supersedes the name row below | publishing |
 | 2026-11-21 | Domain without the prefix: **`<a-b-c-d>.sslip.io`** (was `wann.<a-b-c-d>.sslip.io`). `OLD_DOMAIN` in the server's `.env` makes Caddy redirect the old name to the same path on the new one (301, not logged); unset, that Caddy site is an unused loopback port. Sessions and feed links move to the new name; invite links follow on their own (built from the stored token) | owner |
 | 2026-11-21 | **Invite links stay copyable** while valid: `invites.token` keeps the token (joining still looks up by hash), the settings list shows each active link with a copy button, revoking clears the token. Trade-off: someone with the database can read live invite links (they get the group chat's access, nothing more). The avatar and group ⋯ menus close on a click outside. Supersedes the P2 "shown once" row | owner |

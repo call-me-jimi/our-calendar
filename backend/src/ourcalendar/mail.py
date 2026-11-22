@@ -70,10 +70,10 @@ def make_mailer(settings: Settings) -> Mailer:
 
 _TEXT: dict[str, dict[str, str]] = {
     "de": {
-        "subject": "Dein Anmeldelink für Our Calendar",
+        "subject": "Dein Anmeldelink für Unser Kalender",
         "body": (
             "Hallo {name},\n\n"
-            "mit diesem Link meldest du dich bei Our Calendar an:\n\n{link}\n\n"
+            "mit diesem Link meldest du dich bei Unser Kalender an:\n\n{link}\n\n"
             "Der Link ist 15 Minuten gültig und funktioniert nur einmal.\n"
             "Wenn du das nicht warst, kannst du diese Mail einfach ignorieren.\n"
         ),

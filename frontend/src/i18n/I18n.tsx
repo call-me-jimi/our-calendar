@@ -35,6 +35,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = locale;
+    document.title = translate(locale, "app.name");
   }, [locale]);
 
   const value = useMemo<I18n>(

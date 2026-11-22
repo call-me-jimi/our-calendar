@@ -39,6 +39,13 @@ test("a private page sends a signed-out visitor to sign-in", async () => {
   expect(screen.getByText("Our Calendar")).toBeTruthy();
 });
 
+test("German users see the German name in the header and the title", async () => {
+  localStorage.setItem("locale", "de");
+  renderAt("/signin");
+  expect(await screen.findByText("Unser Kalender")).toBeTruthy();
+  expect(document.title).toBe("Unser Kalender");
+});
+
 test("verify without a token says the link is incomplete", async () => {
   renderAt("/auth/verify");
   expect(await screen.findByText(/This link is incomplete/)).toBeTruthy();

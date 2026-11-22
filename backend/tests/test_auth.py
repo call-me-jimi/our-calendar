@@ -28,10 +28,10 @@ def test_known_email_gets_link_in_their_language(
 
     de, en = mailer.sent
     assert de.to == "anna@example.com"
-    assert de.subject.startswith("Dein Anmeldelink")
+    assert de.subject == "Dein Anmeldelink für Unser Kalender"
     assert f"{BASE}/auth/verify#t=" in de.text
     assert "Hallo Anna" in de.text
-    assert en.subject.startswith("Your sign-in link")
+    assert en.subject == "Your sign-in link for Our Calendar"
 
 
 def test_token_is_stored_hashed(
