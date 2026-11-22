@@ -6,7 +6,7 @@ const mailpit = process.env.E2E_MAILPIT_URL ?? "http://127.0.0.1:8026";
 
 /** A fresh address per run, so the per-address rate limit never bites. */
 export function uniqueEmail(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@wann.test`;
+  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@ourcalendar.test`;
 }
 
 export function createUser(email: string, name: string, admin = false): void {

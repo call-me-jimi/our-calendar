@@ -2,7 +2,7 @@
 # (04:00) and the unattended-upgrades reboot window (04:30 UTC). Persistent: a run missed
 # while the box was off happens at the next boot.
 [Unit]
-Description=Nightly Wann passt's? backup, 03:30 Europe/Berlin
+Description=Nightly Our Calendar backup, 03:30 Europe/Berlin
 
 [Timer]
 OnCalendar=*-*-* 03:30:00 Europe/Berlin

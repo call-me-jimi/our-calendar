@@ -1,4 +1,4 @@
-# Wann passt's? — Specification
+# Our Calendar — Specification
 
 Version 1 · 2026-11-18, redesign (P8) 2026-11-20 · Source of every decision:
 `../../brainstorms/2026-11-18-group-scheduling-app.md` (Q-numbers below refer to that file). The P8 redesign
@@ -321,7 +321,7 @@ deletes the account. It also shows the last holiday sync and its result.
 ### 3.14 Live updates and phone (Q20)
 
 - No WebSockets. Group data is fetched again when the tab gets focus and every 60 s while the tab is visible.
-- Responsive. A web app manifest + icons (name "Wann passt's?", `display: standalone`) lets people add it to the home screen. No
+- Responsive. A web app manifest + icons (name "Our Calendar", `display: standalone`) lets people add it to the home screen. No
   service worker for offline use.
 
 ### 3.15 Privacy note (Q17)
@@ -473,7 +473,7 @@ Browser (React SPA) ──HTTPS──▶ Caddy (TLS, headers, static cache) ─�
 - `make deploy`: build the image locally, `docker save | ssh … docker load`, copy compose/Caddyfile, `docker compose up -d`,
   then check `/api/health`.
 - Secrets (SMTP password) live in a file on the server, mounted as a Docker secret, never in the image.
-- Local: `make up` runs the same compose plus **Mailpit**, at `https://wann.localhost:8444` with Caddy's local CA.
+- Local: `make up` runs the same compose plus **Mailpit**, at `https://ourcalendar.localhost:8444` with Caddy's local CA.
 
 ### 6.4 Backup
 

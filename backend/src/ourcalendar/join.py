@@ -6,10 +6,10 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field, field_validator
 
-from wannpassts.auth import check_password
-from wannpassts.db import transaction
-from wannpassts.deps import CurrentUser, Db, create_session, set_session_cookie
-from wannpassts.security import (
+from ourcalendar.auth import check_password
+from ourcalendar.db import transaction
+from ourcalendar.deps import CurrentUser, Db, create_session, set_session_cookie
+from ourcalendar.security import (
     HOUR,
     PASSWORD_MAX,
     PASSWORD_MIN,

@@ -11,10 +11,10 @@ import icalendar
 from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel
 
-from wannpassts import days
-from wannpassts.authz import require_member
-from wannpassts.deps import CurrentUser, Db
-from wannpassts.security import hash_token, iso, new_token, now
+from ourcalendar import days
+from ourcalendar.authz import require_member
+from ourcalendar.deps import CurrentUser, Db
+from ourcalendar.security import hash_token, iso, new_token, now
 
 router = APIRouter()
 
@@ -81,7 +81,7 @@ def feed(token: str, request: Request, conn: Db) -> Response:
 
     host = urlsplit(request.app.state.settings.base_url).hostname
     cal = icalendar.Calendar()
-    cal.add("prodid", "-//Wann passt's?//wannpassts//DE")
+    cal.add("prodid", "-//Our Calendar//ourcalendar//DE")
     cal.add("version", "2.0")
     cal.add("calscale", "GREGORIAN")
     cal.add("x-wr-calname", group["name"])

@@ -6,11 +6,11 @@ from typing import Annotated, Literal, Self
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from wannpassts import days
-from wannpassts.authz import membership_role, require_group_admin, require_member
-from wannpassts.db import transaction
-from wannpassts.deps import CurrentUser, Db
-from wannpassts.security import iso, now
+from ourcalendar import days
+from ourcalendar.authz import membership_role, require_group_admin, require_member
+from ourcalendar.db import transaction
+from ourcalendar.deps import CurrentUser, Db
+from ourcalendar.security import iso, now
 
 router = APIRouter(prefix="/api")
 

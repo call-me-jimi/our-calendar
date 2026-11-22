@@ -1,14 +1,14 @@
-"""Command line: `python -m wannpassts.cli create-user --email … --name … [--admin]`,
+"""Command line: `python -m ourcalendar.cli create-user --email … --name … [--admin]`,
 `… signin-link --email …` and `… sync-holidays`."""
 
 import argparse
 import sys
 
-from wannpassts import holidays
-from wannpassts.config import load_settings
-from wannpassts.db import open_db, transaction
-from wannpassts.security import HANDED_LINK_LIFETIME, iso, normalize_email, now
-from wannpassts.signin_links import issue_login_link
+from ourcalendar import holidays
+from ourcalendar.config import load_settings
+from ourcalendar.db import open_db, transaction
+from ourcalendar.security import HANDED_LINK_LIFETIME, iso, normalize_email, now
+from ourcalendar.signin_links import issue_login_link
 
 
 def create_user(email: str, name: str, admin: bool, locale: str) -> str:
@@ -52,7 +52,7 @@ def signin_link(email: str) -> str | None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="wannpassts")
+    parser = argparse.ArgumentParser(prog="ourcalendar")
     sub = parser.add_subparsers(dest="command", required=True)
     cu = sub.add_parser("create-user", help="create a user (idempotent)")
     cu.add_argument("--email", required=True)

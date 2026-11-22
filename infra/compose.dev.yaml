@@ -1,4 +1,4 @@
-# Laptop: https://wann.localhost:8444 with Caddy's local CA (`make trust`).
+# Laptop: https://ourcalendar.localhost:8444 with Caddy's local CA (`make trust`).
 # Ports are on loopback and chosen not to collide with the common 8443 and 8025.
 
 services:
@@ -7,7 +7,7 @@ services:
       SMTP_HOST: mailpit
       SMTP_PORT: "1025"
       SMTP_STARTTLS: "false"
-      MAIL_FROM: "Wann passt's? <noreply@wann.localhost>"
+      MAIL_FROM: "Our Calendar <noreply@ourcalendar.localhost>"
       # Every e2e sign-in comes from the same Docker address; production keeps 20.
       LINK_LIMIT_PER_IP: "1000"
 

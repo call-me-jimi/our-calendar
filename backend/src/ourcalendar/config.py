@@ -18,7 +18,7 @@ class Settings:
     smtp_user: str | None = None
     smtp_password: str | None = None
     smtp_starttls: bool = True
-    mail_from: str = "Wann passt's? <noreply@wann.localhost>"
+    mail_from: str = "Our Calendar <noreply@ourcalendar.localhost>"
     # Magic-link emails per client IP and hour (spec §3.1). Raised only for local e2e runs.
     link_limit_per_ip: int = 20
     # Holiday sync at startup and daily at 04:00 Berlin (spec §3.8). Off unless the env turns it on,
@@ -50,7 +50,7 @@ def load_settings() -> Settings:
         password = Path(env["SMTP_PASSWORD_FILE"]).read_text().strip()
     return Settings(
         data_dir=Path(env.get("DATA_DIR", "data")),
-        base_url=env.get("BASE_URL", "https://wann.localhost:8444").rstrip("/"),
+        base_url=env.get("BASE_URL", "https://ourcalendar.localhost:8444").rstrip("/"),
         static_dir=Path(static) if static else None,
         smtp_host=env.get("SMTP_HOST") or None,
         smtp_port=int(env.get("SMTP_PORT", "587")),

@@ -5,7 +5,7 @@
 #                            with DOMAIN set to the server's sslip.io name
 #   server.sh deploy         build the image of HEAD (or SHA=…) here, ship it and the
 #                            commit's infra/ to releases/<sha>, start it, check it from here
-#   server.sh cli ARGS…      the app's CLI (python -m wannpassts.cli) in the running container
+#   server.sh cli ARGS…      the app's CLI (python -m ourcalendar.cli) in the running container
 #   server.sh logs [SERVICE] follow a service's logs (default app)
 #   server.sh ssh            a shell in /srv/wannpassts
 #   server.sh backup-init    keys and repository on the Storage Box, then the nightly timer
@@ -157,7 +157,7 @@ deploy)
 	deploy
 	;;
 cli)
-	remote 'need_release; dc exec -T app python -m wannpassts.cli "$@"' "$@"
+	remote 'need_release; dc exec -T app python -m ourcalendar.cli "$@"' "$@"
 	;;
 logs)
 	remote -t 'need_release; dc logs -f --tail 100 "$1"' "${1:-app}"

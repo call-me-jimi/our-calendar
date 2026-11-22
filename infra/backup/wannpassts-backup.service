@@ -2,7 +2,7 @@
 # `make backup-init` enables its timer. By hand (server):
 #   sudo systemctl start wannpassts-backup; sudo journalctl -u wannpassts-backup -n 50
 [Unit]
-Description=Wann passt's? backup: SQLite copy to the Storage Box (restic)
+Description=Our Calendar backup: SQLite copy to the Storage Box (restic)
 Wants=network-online.target
 After=network-online.target
 

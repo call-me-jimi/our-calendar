@@ -7,8 +7,8 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
+from ourcalendar.security import hash_token, iso, now
 from tests.conftest import add_group, add_user, login_as
-from wannpassts.security import hash_token, iso, now
 
 CALLERS = ["anonymous", "outsider", "removed", "member", "group_admin", "instance_admin"]
 
@@ -26,7 +26,7 @@ class World:
 
 @pytest.fixture
 def world(db: sqlite3.Connection, monkeypatch: pytest.MonkeyPatch) -> World:
-    monkeypatch.setattr("wannpassts.days.berlin_today", lambda: date(2026, 6, 10))
+    monkeypatch.setattr("ourcalendar.days.berlin_today", lambda: date(2026, 6, 10))
     admin = add_user(db, "a@example.com", "Ada")
     member = add_user(db, "m@example.com", "Mia")
     removed = add_user(db, "r@example.com", "Rolf")

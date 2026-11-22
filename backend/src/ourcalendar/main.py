@@ -11,11 +11,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from wannpassts import auth, events, feed, groups, holidays, join, marks, signin_links
-from wannpassts.config import Settings, load_settings
-from wannpassts.db import open_db
-from wannpassts.deps import Db
-from wannpassts.mail import Mailer, make_mailer
+from ourcalendar import auth, events, feed, groups, holidays, join, marks, signin_links
+from ourcalendar.config import Settings, load_settings
+from ourcalendar.db import open_db
+from ourcalendar.deps import Db
+from ourcalendar.mail import Mailer, make_mailer
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 
@@ -37,7 +37,7 @@ def create_app(settings: Settings | None = None, mailer: Mailer | None = None) -
             with suppress(asyncio.CancelledError):
                 await sync
 
-    app = FastAPI(title="Wann passt's?", lifespan=lifespan, docs_url=None, redoc_url=None)
+    app = FastAPI(title="Our Calendar", lifespan=lifespan, docs_url=None, redoc_url=None)
     app.state.settings = settings
     app.state.mailer = mailer or make_mailer(settings)
 

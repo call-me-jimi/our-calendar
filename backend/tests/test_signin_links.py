@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 import pytest
 from fastapi.testclient import TestClient
 
+from ourcalendar.security import hash_token, iso, now
 from tests.conftest import BASE, add_group, add_user, login_as
-from wannpassts.security import hash_token, iso, now
 
 
 @dataclass
@@ -141,7 +141,7 @@ def test_creating_a_link_is_logged_with_ids_only(
     client: TestClient, db: sqlite3.Connection, band: Band, caplog: pytest.LogCaptureFixture
 ) -> None:
     login_as(client, db, band.ada)
-    with caplog.at_level(logging.INFO, logger="wannpassts.signin_links"):
+    with caplog.at_level(logging.INFO, logger="ourcalendar.signin_links"):
         link = link_for(client, band, band.mia)
     assert f"by user {band.ada} for user {band.mia} (group {band.group})" in caplog.text
     assert "mia@example.com" not in caplog.text

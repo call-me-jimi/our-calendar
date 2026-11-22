@@ -6,10 +6,10 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
+from ourcalendar.config import Settings, load_settings
+from ourcalendar.mail import MemoryMailer
+from ourcalendar.main import create_app
 from tests.conftest import add_group, add_user, login_as
-from wannpassts.config import Settings, load_settings
-from wannpassts.mail import MemoryMailer
-from wannpassts.main import create_app
 
 COOKIE = "__Host-session"
 DAY = "2026-06-12"
@@ -17,7 +17,7 @@ DAY = "2026-06-12"
 
 @pytest.fixture(autouse=True)
 def pin_today(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("wannpassts.days.berlin_today", lambda: date(2026, 6, 10))
+    monkeypatch.setattr("ourcalendar.days.berlin_today", lambda: date(2026, 6, 10))
 
 
 def references(db: sqlite3.Connection, user_id: int, email: str) -> list[str]:

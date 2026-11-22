@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from wannpassts.db import MIGRATIONS_DIR, connect, migrate, open_db
+from ourcalendar.db import MIGRATIONS_DIR, connect, migrate, open_db
 
 
 def write(d: Path, name: str, sql: str) -> None:

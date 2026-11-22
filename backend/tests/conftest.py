@@ -6,11 +6,11 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from wannpassts.config import Settings
-from wannpassts.db import connect
-from wannpassts.mail import MemoryMailer
-from wannpassts.main import create_app
-from wannpassts.security import hash_password, iso, now
+from ourcalendar.config import Settings
+from ourcalendar.db import connect
+from ourcalendar.mail import MemoryMailer
+from ourcalendar.main import create_app
+from ourcalendar.security import hash_password, iso, now
 
 BASE = "https://testserver"
 
@@ -79,7 +79,7 @@ def sign_in(client: TestClient, mailer: MemoryMailer, email: str) -> str:
 
 def login_as(client: TestClient, db: sqlite3.Connection, user_id: int | None) -> None:
     """Switch the client to a fresh session of `user_id` (None: signed out), skipping email."""
-    from wannpassts.deps import create_session
+    from ourcalendar.deps import create_session
 
     client.cookies.clear()
     if user_id is not None:

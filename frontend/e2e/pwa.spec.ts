@@ -21,7 +21,7 @@ test("manifest is served with its type and its icons exist at the declared sizes
     start_url: string;
     icons: { src: string; sizes: string; type: string; purpose: string }[];
   };
-  expect(manifest.name).toBe("Wann passt's?");
+  expect(manifest.name).toBe("Our Calendar");
   expect(manifest.display).toBe("standalone");
   expect(manifest.start_url).toBe("/");
   expect(manifest.icons.map((i) => i.purpose).sort()).toEqual(["any", "any", "maskable"]);

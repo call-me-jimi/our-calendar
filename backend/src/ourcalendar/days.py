@@ -1,7 +1,7 @@
 """Calendar days: "today" in Berlin and the editable window (spec §3.4).
 
 Call these as `days.berlin_today()` (not `from days import ...`), so tests can pin "today"
-by monkeypatching `wannpassts.days.berlin_today`.
+by monkeypatching `ourcalendar.days.berlin_today`.
 """
 
 import calendar

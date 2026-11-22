@@ -8,12 +8,12 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, field_validator
 
-from wannpassts import days
-from wannpassts.authz import require_member
-from wannpassts.db import transaction
-from wannpassts.deps import CurrentUser, Db
-from wannpassts.marks import _range
-from wannpassts.security import iso, now
+from ourcalendar import days
+from ourcalendar.authz import require_member
+from ourcalendar.db import transaction
+from ourcalendar.deps import CurrentUser, Db
+from ourcalendar.marks import _range
+from ourcalendar.security import iso, now
 
 router = APIRouter(prefix="/api/groups/{group_id}/events")
 

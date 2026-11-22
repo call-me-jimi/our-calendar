@@ -11,11 +11,11 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
+from ourcalendar import holidays
+from ourcalendar.cli import main
+from ourcalendar.config import Settings
+from ourcalendar.main import create_app
 from tests.conftest import BASE, add_user, login_as
-from wannpassts import holidays
-from wannpassts.cli import main
-from wannpassts.config import Settings
-from wannpassts.main import create_app
 
 # Recorded 2026-11-18 from the live API, validFrom=2027-01-01 validTo=2027-12-31.
 FIXTURES = Path(__file__).parent / "fixtures" / "openholidays"
@@ -35,7 +35,7 @@ RECORDED = httpx.MockTransport(recorded)
 
 @pytest.fixture(autouse=True)
 def today_2027(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("wannpassts.days.berlin_today", lambda: date(2027, 6, 1))
+    monkeypatch.setattr("ourcalendar.days.berlin_today", lambda: date(2027, 6, 1))
 
 
 @pytest.fixture

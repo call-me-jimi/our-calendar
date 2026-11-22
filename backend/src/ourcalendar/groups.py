@@ -7,16 +7,16 @@ from typing import Literal, cast
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 
-from wannpassts.authz import (
+from ourcalendar.authz import (
     Role,
     membership_role,
     require_group_admin,
     require_instance_admin,
     require_member,
 )
-from wannpassts.db import transaction
-from wannpassts.deps import CurrentUser, Db
-from wannpassts.security import hash_token, iso, new_token, now
+from ourcalendar.db import transaction
+from ourcalendar.deps import CurrentUser, Db
+from ourcalendar.security import hash_token, iso, new_token, now
 
 router = APIRouter(prefix="/api/groups")
 

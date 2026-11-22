@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from wannpassts.config import Settings
-from wannpassts.main import create_app
+from ourcalendar.config import Settings
+from ourcalendar.main import create_app
 
 
 @pytest.fixture

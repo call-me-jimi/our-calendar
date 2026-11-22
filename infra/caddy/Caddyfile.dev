@@ -1,4 +1,4 @@
-# Laptop: https://wann.localhost:8444 with Caddy's own local CA.
+# Laptop: https://ourcalendar.localhost:8444 with Caddy's own local CA.
 # Headers match spec §6.2 (headers.caddy, shared with Caddyfile.prod, which adds HSTS).
 {
 	local_certs
@@ -8,7 +8,7 @@
 
 import headers.caddy
 
-wann.localhost {
+ourcalendar.localhost {
 	encode zstd gzip
 	import security_headers
 	reverse_proxy app:8000

@@ -4,9 +4,9 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx2 import Response
 
+from ourcalendar.mail import MemoryMailer
+from ourcalendar.security import iso, now
 from tests.conftest import add_group, add_user, login_as
-from wannpassts.mail import MemoryMailer
-from wannpassts.security import iso, now
 
 
 @pytest.fixture

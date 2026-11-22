@@ -1,6 +1,6 @@
-# Wann passt's?
+# Our Calendar
 
-*"When suits?"* — a small, self-hosted web app where a group of friends (a band, a sports team, a family)
+A small, self-hosted web app where a group of friends (a band, a sports team, a family)
 marks the days they can't make it, and sees at a glance which days suit everyone.
 
 It is built for **one private instance per person or club**: there is no public sign-up, people join a group
@@ -52,7 +52,7 @@ make trust                                    # export Caddy's local root certif
 make create-admin EMAIL=you@example.com NAME=You
 ```
 
-Open https://wann.localhost:8444 and sign in. The sign-in link arrives in Mailpit at http://127.0.0.1:8026.
+Open https://ourcalendar.localhost:8444 and sign in. The sign-in link arrives in Mailpit at http://127.0.0.1:8026.
 Then set a password under **Account**, create a group under **Admin**, and invite people with a link from the
 group's **Settings**.
 
@@ -74,12 +74,12 @@ The app reads its settings from the environment. With Compose they come from `.e
 
 | Variable | Default | What |
 | --- | --- | --- |
-| `BASE_URL` | `https://wann.localhost:8444` | The public address. Used in links and for the `Origin` check |
+| `BASE_URL` | `https://ourcalendar.localhost:8444` | The public address. Used in links and for the `Origin` check |
 | `OPERATOR_NAME` | empty | Who runs this instance, named on the privacy page. Empty: no name shown |
 | `SMTP_HOST` | empty | Set it to turn mail on. Empty means **link mode**: no mail at all |
 | `SMTP_PORT`, `SMTP_USER`, `SMTP_STARTTLS` | `587`, empty, `true` | SMTP connection |
 | `SMTP_PASSWORD_FILE` | empty | A file holding the SMTP password (`SMTP_PASSWORD` also works) |
-| `MAIL_FROM` | `Wann passt's? <noreply@wann.localhost>` | Sender of sign-in emails |
+| `MAIL_FROM` | `Our Calendar <noreply@ourcalendar.localhost>` | Sender of sign-in emails |
 | `HOLIDAY_SYNC` | `true` | Fetch holidays at start and daily at 04:00 Europe/Berlin |
 | `DATA_DIR` | `data` (`/data` in the image) | Where the SQLite database lives |
 
@@ -104,6 +104,9 @@ Step-by-step runbooks:
 - [docs/runbooks/backup.md](docs/runbooks/backup.md): backups, the restore drill, recovery
 - [docs/runbooks/invite.md](docs/runbooks/invite.md): getting people in, forgotten passwords
 
+The server side keeps the project's original name, `wannpassts`: the `/srv/wannpassts` directory,
+the Compose project, the Docker image tags, the backup's systemd units and the Hetzner resources.
+
 Any host that runs Docker Compose works too: `infra/compose.yaml` plus your own overlay modeled on
 `infra/compose.prod.yaml` and `infra/caddy/Caddyfile.prod`.
 
@@ -124,7 +127,7 @@ Found a vulnerability? Please report it privately through GitHub's
 
 | Path | What |
 | --- | --- |
-| `backend/` | FastAPI app (`src/wannpassts/`), SQL migrations, CLI (`python -m wannpassts.cli`), tests |
+| `backend/` | FastAPI app (`src/ourcalendar/`), SQL migrations, CLI (`python -m ourcalendar.cli`), tests |
 | `frontend/` | React SPA (`src/`), Playwright tests (`e2e/`), PWA icons |
 | `infra/` | Dockerfile, Compose files, Caddyfiles, cloud-init, deploy and backup scripts |
 | `docs/spec.md` | What the app does: roles, screens, data model, API, security, operations |

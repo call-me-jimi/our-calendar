@@ -10,7 +10,7 @@ from typing import Literal
 
 from fastapi import HTTPException
 
-from wannpassts.deps import User
+from ourcalendar.deps import User
 
 Role = Literal["admin", "member"]
 

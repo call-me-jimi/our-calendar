@@ -11,6 +11,6 @@ test("shell renders under the CSP without console errors", async ({ page }) => {
   const res = await page.goto("/signin");
   expect(res?.headers()["content-security-policy"]).toContain("default-src 'self'");
   await expect(page.getByRole("heading", { name: /Sign in|Anmelden/ })).toBeVisible();
-  await expect(page.getByText("Wann passt's?")).toBeVisible();
+  await expect(page.getByText("Our Calendar")).toBeVisible();
   expect(errors).toEqual([]);
 });

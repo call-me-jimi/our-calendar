@@ -4,8 +4,8 @@ import sqlite3
 
 from fastapi.testclient import TestClient
 
+from ourcalendar.security import hash_password, verify_password
 from tests.conftest import add_user, login_as
-from wannpassts.security import hash_password, verify_password
 
 COOKIE = "__Host-session"
 

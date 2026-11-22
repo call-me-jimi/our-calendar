@@ -1,7 +1,7 @@
 [project]
-name = "wannpassts"
+name = "ourcalendar"
 version = "0.1.0"
-description = "Wann passt's? - find days that suit the whole group"
+description = "Our Calendar - find days that suit the whole group"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "fastapi>=0.163.2",

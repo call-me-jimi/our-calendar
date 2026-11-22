@@ -8,8 +8,8 @@ from typing import Annotated, Literal
 
 from fastapi import Depends, HTTPException, Request, Response
 
-from wannpassts.db import connect
-from wannpassts.security import hash_token, iso, new_token, now
+from ourcalendar.db import connect
+from ourcalendar.security import hash_token, iso, new_token, now
 
 COOKIE = "__Host-session"
 SESSION_LIFETIME = timedelta(days=90)

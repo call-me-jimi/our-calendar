@@ -7,9 +7,9 @@ from typing import Literal
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response
 from pydantic import BaseModel, Field, field_validator
 
-from wannpassts.authz import require_instance_admin
-from wannpassts.db import transaction
-from wannpassts.deps import (
+from ourcalendar.authz import require_instance_admin
+from ourcalendar.db import transaction
+from ourcalendar.deps import (
     CurrentUser,
     Db,
     User,
@@ -17,8 +17,8 @@ from wannpassts.deps import (
     create_session,
     set_session_cookie,
 )
-from wannpassts.mail import magic_link_mail
-from wannpassts.security import (
+from ourcalendar.mail import magic_link_mail
+from ourcalendar.security import (
     HOUR,
     LIMIT_LOGIN_PER_EMAIL,
     LIMIT_LOGIN_PER_IP,
@@ -37,7 +37,7 @@ from wannpassts.security import (
     rate_hit,
     verify_password,
 )
-from wannpassts.signin_links import issue_login_link
+from ourcalendar.signin_links import issue_login_link
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api")

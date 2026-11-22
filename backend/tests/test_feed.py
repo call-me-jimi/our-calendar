@@ -13,7 +13,7 @@ TODAY = date(2026, 6, 10)
 
 @pytest.fixture(autouse=True)
 def pin_today(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("wannpassts.days.berlin_today", lambda: TODAY)
+    monkeypatch.setattr("ourcalendar.days.berlin_today", lambda: TODAY)
 
 
 @pytest.fixture

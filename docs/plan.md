@@ -1,4 +1,4 @@
-# Wann passt's? — Implementation plan
+# Our Calendar — Implementation plan
 
 Version 1 · 2026-11-18 · Implements `spec.md` (section numbers below refer to it).
 
@@ -8,7 +8,7 @@ calendar, data before the views that summarise it, and deployment last, once the
 
 | Phase | Delivers | Phase check |
 | --- | --- | --- |
-| P0 | Repo skeleton, tooling, local stack | `make check` green; `https://wann.localhost:8444` shows the SPA shell, `/api/health` 200 |
+| P0 | Repo skeleton, tooling, local stack | `make check` green; `https://ourcalendar.localhost:8444` shows the SPA shell, `/api/health` 200 |
 | P1 | Identity: magic link, sessions, admin bootstrap, i18n base | e2e: admin signs in via Mailpit; replayed cookie after logout → 401 |
 | P2 | Groups, roles, invite links, join flow | permission matrix passes; e2e: invite → new member joins |
 | P3 | Calendar tab: marking, undo, notes, admin marking for others | e2e: drag range (desktop) + tap range (phone) persist across reload |
@@ -26,7 +26,7 @@ calendar, data before the views that summarise it, and deployment last, once the
 
 1. **Repo layout.** `git init`, `README.md`, `.gitignore`, `.env.example`, `Makefile`.
    ```
-   backend/   pyproject.toml (uv), src/wannpassts/{main.py, config.py, db.py}, tests/
+   backend/   pyproject.toml (uv), src/ourcalendar/{main.py, config.py, db.py}, tests/
    frontend/  package.json, vite.config.ts, src/{main.tsx, App.tsx}, index.html
    infra/     compose.yaml, compose.dev.yaml (Mailpit), Caddyfile, Caddyfile.dev, Dockerfile
    docs/      spec.md, plan.md, decisions.md
@@ -43,7 +43,7 @@ calendar, data before the views that summarise it, and deployment last, once the
 4. **Image and local stack.** A multi-stage Dockerfile (node build → python slim, non-root). FastAPI serves `dist/` with
    an SPA fallback to `index.html` for non-`/api` paths. The compose files cover `app` and `caddy` (+ `mailpit` in dev).
    `make up`, `make down`, `make logs`, `make trust` (export Caddy's local root cert).
-   - Check: `https://wann.localhost:8444` shows the shell and `curl -k …/api/health` returns `{"ok":true}`.
+   - Check: `https://ourcalendar.localhost:8444` shows the shell and `curl -k …/api/health` returns `{"ok":true}`.
 5. **Quality gates.** `make check` = ruff, mypy --strict, pytest, ESLint, tsc --noEmit, vitest. GitHub Actions (or the CI of
    choice) runs `make check` on push.
    - Check: CI green on the first commit.
@@ -64,7 +64,7 @@ calendar, data before the views that summarise it, and deployment last, once the
    An **Origin check** middleware runs on all non-GET requests.
    - Check: pytest covers an unknown email getting the same 202 and timing within tolerance and no email sent, the 6th request in an hour being
      refused silently (still 202, no email), and a missing or foreign Origin → 403.
-5. **Admin bootstrap.** `make create-admin EMAIL=… NAME=…` (CLI `python -m wannpassts.cli create-admin`) creates or flags the
+5. **Admin bootstrap.** `make create-admin EMAIL=… NAME=…` (CLI `python -m ourcalendar.cli create-admin`) creates or flags the
    instance admin.
    - Check: running it twice is idempotent.
 6. **Frontend.** `/signin` (email form, "check your inbox" state), `/auth/verify` (reads the fragment, shows a "Sign in" button, POSTs,
@@ -322,7 +322,7 @@ Work on branch `p8-redesign`.
    chips, switch, stepper, bottom sheet, popover, toast. Restyle the app header (logo mark, DE/EN pill, avatar → Konto)
    and the group header (name, member faces and count, pill tabs, ⋯ menu).
    - Check: `npm run build` emits the font files into `dist/`; the browser console shows no CSP errors on
-     `https://wann.localhost:8444`; header screenshots match the mockup in both themes.
+     `https://ourcalendar.localhost:8444`; header screenshots match the mockup in both themes.
 3. **Routes.** Add `/g/:gid/days` (Meine Tage) and `/g/:gid/group` (Gruppe; `?layout=table` for the table,
    `?day=YYYY-MM-DD` to open a day). The index route and the old `/calendar` and `/overview` URLs redirect there (old links
    and installed apps keep working). Update the links in Home, Join, Verify, Admin and the group switcher.
@@ -383,7 +383,7 @@ Work on branch `p8-redesign`.
 One line each, dated 2026-11-18, all from the brainstorm (Q1–Q21): private instance; whole days with busy/maybe/free;
 roles; magic link (no Zitadel); two tabs + colours; brush and drag; notes per day; OpenHolidays BE/BB separate; availability per
 user; events group-local; multi-use invite links; no notifications; iCal export only; DE + EN; FastAPI + SQLite + React;
-own Hetzner server; keep data forever; security defaults; Find dates; polling + PWA; name "Wann passt's?".
+own Hetzner server; keep data forever; security defaults; Find dates; polling + PWA; name "Our Calendar".
 Plus the details decided while writing the spec (not discussed separately):
 
 - magic-link token in the URL fragment;

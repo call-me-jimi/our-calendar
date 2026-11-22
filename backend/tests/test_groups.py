@@ -3,8 +3,8 @@ from datetime import timedelta
 
 from fastapi.testclient import TestClient
 
+from ourcalendar.security import iso, now
 from tests.conftest import BASE, add_group, add_user, login_as
-from wannpassts.security import iso, now
 
 
 def test_instance_admin_creates_group_and_becomes_its_admin(

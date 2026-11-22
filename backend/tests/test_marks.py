@@ -6,15 +6,15 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
+from ourcalendar.days import window_end
 from tests.conftest import add_group, add_user, login_as
-from wannpassts.days import window_end
 
 TODAY = date(2026, 6, 10)  # window end: 2027-06-10
 
 
 @pytest.fixture(autouse=True)
 def pin_today(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("wannpassts.days.berlin_today", lambda: TODAY)
+    monkeypatch.setattr("ourcalendar.days.berlin_today", lambda: TODAY)
 
 
 def day(offset: int) -> str:

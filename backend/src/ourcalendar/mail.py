@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from email.message import EmailMessage
 from typing import Literal, Protocol
 
-from wannpassts.config import Settings
+from ourcalendar.config import Settings
 
 log = logging.getLogger(__name__)
 
@@ -70,19 +70,19 @@ def make_mailer(settings: Settings) -> Mailer:
 
 _TEXT: dict[str, dict[str, str]] = {
     "de": {
-        "subject": "Dein Anmeldelink für Wann passt's?",
+        "subject": "Dein Anmeldelink für Our Calendar",
         "body": (
             "Hallo {name},\n\n"
-            "mit diesem Link meldest du dich bei Wann passt's? an:\n\n{link}\n\n"
+            "mit diesem Link meldest du dich bei Our Calendar an:\n\n{link}\n\n"
             "Der Link ist 15 Minuten gültig und funktioniert nur einmal.\n"
             "Wenn du das nicht warst, kannst du diese Mail einfach ignorieren.\n"
         ),
     },
     "en": {
-        "subject": "Your sign-in link for Wann passt's?",
+        "subject": "Your sign-in link for Our Calendar",
         "body": (
             "Hi {name},\n\n"
-            "use this link to sign in to Wann passt's?:\n\n{link}\n\n"
+            "use this link to sign in to Our Calendar:\n\n{link}\n\n"
             "The link is valid for 15 minutes and works once.\n"
             "If this wasn't you, just ignore this email.\n"
         ),

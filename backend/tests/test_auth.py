@@ -3,9 +3,9 @@ from datetime import timedelta
 
 from fastapi.testclient import TestClient
 
+from ourcalendar.mail import MemoryMailer
+from ourcalendar.security import hash_token, iso, now
 from tests.conftest import BASE, add_user, link_token, sign_in
-from wannpassts.mail import MemoryMailer
-from wannpassts.security import hash_token, iso, now
 
 COOKIE = "__Host-session"
 

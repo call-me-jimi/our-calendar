@@ -73,7 +73,7 @@ def hash_password(password: str) -> str:
 def _common_passwords() -> frozenset[str]:
     # The NCSC's 100,000 most common passwords from Have I Been Pwned (via SecLists, MIT),
     # lowercased, 8 to 200 characters only (shorter ones are refused anyway).
-    text = files("wannpassts").joinpath("common_passwords.txt").read_text("utf-8")
+    text = files("ourcalendar").joinpath("common_passwords.txt").read_text("utf-8")
     return frozenset(text.splitlines())
 
 

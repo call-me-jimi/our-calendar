@@ -20,7 +20,7 @@ install:  ## install backend and frontend dependencies
 	cd backend && uv sync
 	cd frontend && npm ci --no-audit --no-fund
 
-up: .env  ## build and start the stack at https://wann.localhost:8444 (Mailpit: http://127.0.0.1:8026)
+up: .env  ## build and start the stack at https://ourcalendar.localhost:8444 (Mailpit: http://127.0.0.1:8026)
 	$(COMPOSE) up -d --build --wait
 
 down:  ## stop the stack, keep data
@@ -41,20 +41,20 @@ trust:  ## copy Caddy's local root certificate out, to import into the browser
 	@echo "Import .local/caddy-root.crt into your browser's certificate authorities."
 
 create-admin:  ## make create-admin EMAIL=you@example.com NAME=You
-	$(COMPOSE) exec -T app python -m wannpassts.cli create-user --email "$(EMAIL)" --name "$(NAME)" --admin
+	$(COMPOSE) exec -T app python -m ourcalendar.cli create-user --email "$(EMAIL)" --name "$(NAME)" --admin
 
 create-user:  ## make create-user EMAIL=… NAME=… (normally people join via an invite link)
-	$(COMPOSE) exec -T app python -m wannpassts.cli create-user --email "$(EMAIL)" --name "$(NAME)"
+	$(COMPOSE) exec -T app python -m ourcalendar.cli create-user --email "$(EMAIL)" --name "$(NAME)"
 
 signin-link:  ## make signin-link EMAIL=… (prints a sign-in link, 24 h, single use; e.g. for yourself without mail)
-	$(COMPOSE) exec -T app python -m wannpassts.cli signin-link --email "$(EMAIL)"
+	$(COMPOSE) exec -T app python -m ourcalendar.cli signin-link --email "$(EMAIL)"
 
 sync-holidays:  ## fetch holidays from OpenHolidays now (the app also does this daily at 04:00)
-	$(COMPOSE) exec -T app python -m wannpassts.cli sync-holidays
+	$(COMPOSE) exec -T app python -m ourcalendar.cli sync-holidays
 
 dev-api:  ## run the API with reload on :8000 (pair with dev-web)
 	cd backend && DATA_DIR=../.local/dev-data BASE_URL=http://localhost:5173 \
-		uv run uvicorn wannpassts.main:create_app --factory --reload --port 8000
+		uv run uvicorn ourcalendar.main:create_app --factory --reload --port 8000
 
 dev-web:  ## run Vite on :5173, proxying /api to dev-api
 	cd frontend && npm run dev

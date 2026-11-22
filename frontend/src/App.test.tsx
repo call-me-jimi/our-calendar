@@ -36,7 +36,7 @@ function renderAt(path: string) {
 test("a private page sends a signed-out visitor to sign-in", async () => {
   renderAt("/g/1/calendar");
   expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
-  expect(screen.getByText("Wann passt's?")).toBeTruthy();
+  expect(screen.getByText("Our Calendar")).toBeTruthy();
 });
 
 test("verify without a token says the link is incomplete", async () => {

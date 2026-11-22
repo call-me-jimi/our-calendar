@@ -139,7 +139,7 @@ function Header() {
               <i key={i} className={on ? "on" : undefined} />
             ))}
           </span>
-          Wann passt's?
+          Our Calendar
         </Link>
         <div className="header-right">
           <nav className="lang" aria-label={t("lang.switch")}>

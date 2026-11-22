@@ -65,9 +65,9 @@ for table in ("users", "groups", "memberships", "day_marks", "events"):
 if [[ -n ${EMAIL:-} ]]; then
 	echo
 	echo "sign in (Chrome or Firefox: they allow the secure cookie on http://localhost):"
-	docker exec "$name" python -m wannpassts.cli signin-link --email "$EMAIL" || true
+	docker exec "$name" python -m ourcalendar.cli signin-link --email "$EMAIL" || true
 else
-	echo "a sign-in link: docker exec $name python -m wannpassts.cli signin-link --email <you>"
+	echo "a sign-in link: docker exec $name python -m ourcalendar.cli signin-link --email <you>"
 fi
 echo
 read -rp "Enter stops the app and deletes the restored copy. "

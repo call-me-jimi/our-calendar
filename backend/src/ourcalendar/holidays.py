@@ -18,12 +18,12 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from wannpassts import days
-from wannpassts.authz import require_instance_admin
-from wannpassts.db import connect, transaction
-from wannpassts.deps import CurrentUser, Db
-from wannpassts.marks import _range
-from wannpassts.security import iso, now
+from ourcalendar import days
+from ourcalendar.authz import require_instance_admin
+from ourcalendar.db import connect, transaction
+from ourcalendar.deps import CurrentUser, Db
+from ourcalendar.marks import _range
+from ourcalendar.security import iso, now
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api")

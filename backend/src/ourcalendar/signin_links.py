@@ -11,10 +11,10 @@ from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from wannpassts.authz import require_group_admin
-from wannpassts.db import transaction
-from wannpassts.deps import CurrentUser, Db, User
-from wannpassts.security import (
+from ourcalendar.authz import require_group_admin
+from ourcalendar.db import transaction
+from ourcalendar.deps import CurrentUser, Db, User
+from ourcalendar.security import (
     HANDED_LINK_LIFETIME,
     HOUR,
     LIMIT_LINKS_PER_CALLER,
